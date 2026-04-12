@@ -1,0 +1,189 @@
+.hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+  background: linear-gradient(135deg, #0b2a4d, #17497d);
+  color: #ffffff;
+  border-radius: 0 0 26px 26px;
+  box-shadow: 0 8px 30px rgba(11,42,77,0.12);
+}
+
+.hero h1 {font-size:42px; margin:0 0 8px;}
+.hero p {font-size:16px; margin:0; opacity:0.95;}
+
+.container {
+  max-width: 1100px;
+  margin: -40px auto 80px; /* overlap hero */
+  padding: 0 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 920px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 6px solid #0b2a4d; /* To'q ko'k atrof */
+  padding: 28px;
+  box-shadow: 0 18px 50px rgba(11,42,77,0.08);
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 26px;
+  align-items: start;
+}
+
+.card .left h2 {color:#0b2a4d; font-size:22px; margin:0 0 10px;}
+.card .left p {color:#475569; line-height:1.7; font-size:15.5px; margin:0 0 16px;}
+
+.pill {
+  display:inline-block;
+  background: linear-gradient(90deg, rgba(11,42,77,0.06), rgba(23,73,125,0.04));
+  color:#0b2a4d;
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:600;
+  font-size:13px;
+  border:1px solid rgba(11,42,77,0.06);
+}
+
+.card .right {
+  background: linear-gradient(180deg, #f8fbff, #ffffff);
+  border-radius:12px;
+  padding:18px;
+  box-shadow: 0 6px 18px rgba(11,42,77,0.03);
+  text-align:center;
+  border:1px solid #e6eef9;
+}
+
+.avatar {
+  width:120px; height:120px; border-radius:50%; background:#0b2a4d; color:#fff;
+  display:inline-flex; align-items:center; justify-content:center; font-size:34px; font-weight:700; margin:6px auto 12px;
+  box-shadow: 0 8px 20px rgba(11,42,77,0.12);
+}
+
+.founder-name {color:#0b2a4d; font-size:18px; font-weight:700; margin:8px 0 6px;}
+.founder-role {color:#4f5b6b; font-size:14px; margin:0 0 12px;}
+.skills {display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
+.skill {background:#f1f6ff; color:#0b2a4d; padding:6px 10px; border-radius:8px; font-size:13px; border:1px solid #dbeafc;}
+
+@media (max-width:900px){
+  .card{grid-template-columns:1fr;}
+  .container{margin-top:20px}
+}
+.profile-card {
+  max-width: 460px;
+  margin: 70px auto;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 34px 34px 40px;
+  border: 6px solid #0b2a4d;
+  box-shadow: 0 20px 55px rgba(11,42,77,0.12);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-card::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 180px;
+  height: 180px;
+  background: rgba(11,42,77,0.08);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.profile-card::after {
+  content: "";
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 160px;
+  height: 160px;
+  background: rgba(23,73,125,0.06);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0b2a4d, #17497d);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  font-weight: 700;
+  margin: 10px auto 16px;
+  box-shadow: 0 10px 26px rgba(11,42,77,0.18);
+  position: relative;
+  z-index: 2;
+}
+
+.founder-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0b2a4d;
+  margin: 6px 0 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.founder-role {
+  color: #4f5b6b;
+  font-size: 15px;
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.info-line {
+  font-size: 15px;
+  color: #1a1a1a;
+  margin: 4px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.social-icons {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.social-icons a {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #0b2a4d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: 0.25s ease;
+}
+
+.social-icons a:hover {
+  background: #0b2a4d;
+  color: #fff;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(11,42,77,0.26);
+}
+
+.social-icons svg {
+  width: 20px;
+  height: 20px;
+  stroke: #0b2a4d;
+  transition: 0.25s ease;
+}
+
+.social-icons a:hover svg {
+  stroke: #fff;
+}
