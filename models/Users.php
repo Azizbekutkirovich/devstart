@@ -7,6 +7,8 @@ use yii\db\ActiveRecord;
 
 class Users extends ActiveRecord implements \yii\web\IdentityInterface
 {
+    private $_activeData;
+
 	public static function tableName()
 	{
 		return "users";
@@ -22,7 +24,7 @@ class Users extends ActiveRecord implements \yii\web\IdentityInterface
 
 	public static function findIdentity($id)
 	{
-		return self::find()->select(["id", "fullname", "email"])->where(['id' => $id])->one();
+		return self::find()->select(["id", "fullname", "email", "last_active_user_data_id"])->where(['id' => $id])->one();
 	}
 
 	public static function findIdentityByAccessToken($token, $type = null)
@@ -47,6 +49,23 @@ class Users extends ActiveRecord implements \yii\web\IdentityInterface
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getLastActiveUserDataId()
+    {
+        return $this->last_active_user_data_id; 
+    }
+
+    public function getActiveData()
+    {
+        if ($this->_activeData === null) {
+            // Bir marta bazadan olamiz va shu o'zgaruvchiga saqlaymiz
+            $this->_activeData = UserData::find()
+                ->where(['id' => $this->last_active_user_data_id])
+                ->asArray()
+                ->one();
+        }
+        return $this->_activeData;
     }
 
     /**

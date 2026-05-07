@@ -5,8 +5,12 @@ namespace app\controllers;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use app\models\UserData;
+use app\models\Courses;
 use app\models\Topics;
 use app\models\Levels;
+use app\models\Chats;
+use app\models\Messages;
 use app\services\GeminiApiService;
 use app\services\PromptService;
 
@@ -22,6 +26,7 @@ use app\services\PromptService;
  */
 class ChatController extends Controller
 {
+    public $layout = "dashboard";
     // =========================================================================
     // Behaviors
     // =========================================================================
@@ -49,14 +54,20 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body  = Yii::$app->request->getBodyParams();
-        $topic = $this->resolveTopic((int) ($body['topic_id'] ?? 0));
+        $course = $this->resolveCourse();
+        $topic = $this->resolveTopic((int) ($body['topic_id'] ?? 0), $course['id']);
         $level = $this->resolveLevel();                          // user→session | guest→body
 
+        $mentor = $course['mentor'];
+
         $prompt = $this->resolvePrompt('generate-topic', [
-            'category'   => $topic['category'],
-            'language'   => $topic['language'],
-            'level'      => $level['name'],
+            'mentor_name' => $mentor['name'],
+            'mentor_personality' => $mentor['personality'],
+            'course_name' => $course['name'],
+            'level_title' => $level['title'],
+            'level_description' => $level['description'],
             'topic_name' => $topic['title'],
+            'key_concepts' => $topic['key_concepts']
         ], $topic['type']);
 
         if (Yii::$app->user->isGuest) {
@@ -71,15 +82,16 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body           = Yii::$app->request->getBodyParams();
-        $topic          = $this->resolveTopic((int) ($body['topic_id'] ?? 0));
+        $course = $this->resolveCourse((int) ($body['course_id'] ?? 0));
+        $topic          = $this->resolveTopic((int) ($body['topic_id'] ?? 0), (int) ($body['course_id'] ?? 0));
         $level          = $this->resolveLevel();
         $lesson_content = $this->requireField($body, 'lesson_content');
 
         $prompt = $this->resolvePrompt('generate-practice', [
             'lesson_content' => $lesson_content,
-            'category'       => $topic['category'],
-            'language'       => $topic['language'],
-            'level'          => $level['name'],
+            'course_name'       => $course['name'],
+            'level_title'          => $level['title'],
+            'level_description'          => $level['description'],
             'topic_name'     => $topic['title'],
         ]);
 
@@ -95,14 +107,15 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body          = Yii::$app->request->getBodyParams();
-        $topic         = $this->resolveTopic((int) ($body['topic_id'] ?? 0));
+        $course = $this->resolveCourse((int) ($body['course_id'] ?? 0));
+        $topic         = $this->resolveTopic((int) ($body['topic_id'] ?? 0), (int) ($body['course_id'] ?? 0));
         $level         = $this->resolveLevel();
         $user_question = $this->requireField($body, 'user_question');
 
         $prompt = $this->resolvePrompt('ask-question-about-topic', [
-            'category'      => $topic['category'],
-            'language'      => $topic['language'],
-            'level'         => $level['name'],
+            'course_name'      => $course['name'],
+            'level_title'         => $level['title'],
+            'level_description'         => $level['description'],
             'topic_name'    => $topic['title'],
             'user_question' => $user_question,
         ]);
@@ -119,7 +132,8 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body         = Yii::$app->request->getBodyParams();
-        $topic        = $this->resolveTopic((int) ($body['topic_id'] ?? 0));
+        $course = $this->resolveCourse((int) ($body['course_id'] ?? 0));
+        $topic        = $this->resolveTopic((int) ($body['topic_id'] ?? 0), (int) ($body['course_id'] ?? 0));
         $level        = $this->resolveLevel();
         $practices    = $this->requireField($body, 'practices');
         $user_answers = $body['answers'] ?? [];
@@ -129,9 +143,9 @@ class ChatController extends Controller
         }
 
         $prompt = $this->resolvePrompt('check-practice', [
-            'category'     => $topic['category'],
-            'language'     => $topic['language'],
-            'level'        => $level['name'],
+            'course_name'     => $course['name'],
+            'level_title'        => $level['title'],
+            'level_description'        => $level['description'],
             'practices'    => $practices,
             'user_answers' => $this->formatAnswers($user_answers),
         ]);
@@ -152,15 +166,17 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body           = Yii::$app->request->getBodyParams();
-        $topic          = $this->resolveTopic((int) ($body['topic_id'] ?? 0), useJson: true);
+        $course = $this->resolveCourse((int) ($body['course_id'] ?? 0));
+        $topic          = $this->resolveTopic((int) ($body['topic_id'] ?? 0), (int) ($body['course_id'] ?? 0), useJson: true);
         $level          = $this->resolveLevel(useJson: true);
         $lesson_content = $this->requireField($body, 'lesson_content', useJson: true);
 
+
         $prompt = $this->resolvePrompt('generate-quiz-test', [
             'lesson_content' => $lesson_content,
-            'category'       => $topic['category'],
-            'language'       => $topic['language'],
-            'level'          => $level['name'],
+            'course_name'       => $course['name'],
+            'level_title'          => $level['title'],
+            'level_description'          => $level['description'],
             'topic_name'     => $topic['title'],
         ]);
 
@@ -197,20 +213,82 @@ class ChatController extends Controller
     // =========================================================================
 
     /**
-     * Mehmon foydalanuvchilar uchun chat sahifasi.
+     * Tizimga kirgan foydalanuvchilar uchun chat sahifasi.
      */
-    public function actionChatPreview(int $topic_id, int $level_id): string
-    {
-        $topic = Topics::getTopicById($topic_id);
-        $level = Levels::getLevelById($level_id);
+    public function actionChat(int $topic_id) {
+        $course = Courses::findOne(Yii::$app->user->identity->activeData['course_id']);
+        $topic = Topics::find()
+            ->alias('t')
+            ->select(['t.id', 't.module_id', 't.type', 't.title'])
+            ->innerJoin('course_modules cm', 'cm.module_id = t.module_id')
+            ->where([
+                't.id' => $topic_id,
+                'cm.course_id' => Yii::$app->user->identity->activeData['course_id']
+            ])
+            ->with(['module'])
+            ->asArray()
+            ->one();
+        $chat_id = $this->resolveChat($topic_id);
+        $messages = Messages::find()
+            ->where(['chat_id' => $chat_id])
+            ->orderBy(['created_at' => SORT_ASC])
+            ->asArray()
+            ->all();
+        // echo '<pre>';
+        //     print_r($messages);
+        // echo '</pre>';
+        // die;
 
-        if (!$topic || !$level) {
+        if (!$topic) {
             return $this->goBack();
         }
 
         return $this->render('chat', [
+            'topic_type' => $topic['type'],
             'topic_name' => $topic['title'],
-            'topic_type' => $topic['type']
+            'mentor_avatar' => $course->mentor->chat_img,
+            'messages' => $messages
+        ]);        
+    }
+
+
+    /**
+     * Mehmon foydalanuvchilar uchun chat sahifasi.
+     */
+    public function actionChatPreview(int $course_id, int $topic_id, int $level_id)
+    {
+        $levelExists = Levels::find()->where(['id' => $level_id])->exists();
+
+        if (!$levelExists) {
+            return $this->goBack();
+        }
+
+        $course = Courses::findOne($course_id);
+
+        if (!$course) {
+            return $this->goBack();
+        }
+
+        $topic = Topics::find()
+            ->alias('t')
+            ->select(['t.id', 't.module_id', 't.type', 't.title'])
+            ->innerJoin('course_modules cm', 'cm.module_id = t.module_id')
+            ->where([
+                't.id' => $topic_id,
+                'cm.course_id' => $course_id
+            ])
+            ->with(['module'])
+            ->asArray()
+            ->one();
+
+        if (!$topic) {
+            return $this->goBack();
+        }
+
+        return $this->render('chat', [
+            'topic_type' => $topic['type'],
+            'topic_name' => $topic['title'],
+            'mentor_avatar' => $course->mentor->chat_img
         ]);
     }
 
@@ -224,21 +302,29 @@ class ChatController extends Controller
     private function handleGuestGenerateTopic(string $prompt): void
     {
         $this->streamResponse($prompt);
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
     }
 
     private function handleGuestGeneratePractice(string $prompt): void
     {
         $this->streamResponse($prompt);
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
     }
 
     private function handleGuestAskQuestion(string $prompt): void
     {
         $this->streamResponse($prompt);
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
     }
 
     private function handleGuestCheckPractice(string $prompt): void
     {
         $this->streamResponse($prompt);
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
     }
 
     private function handleGuestGenerateQuizTest(string $prompt)
@@ -301,12 +387,19 @@ class ChatController extends Controller
             $content .= $chunk;
         });
 
-        // TODO: UserLesson::saveOrUpdate([
-        //     'user_id'  => Yii::$app->user->id,
-        //     'topic_id' => $topic['id'],
-        //     'level_id' => $level['id'],
-        //     'content'  => $content,
-        // ]);
+        $chat_id = $this->resolveChat($topic['id']);
+
+        if (!$chat_id) exit();
+
+
+        $lesson_content = [
+            "text" => $content
+        ];
+
+        if (!Messages::create($chat_id, 'system', 'text', ["text" => "Darsni boshlash"]) || !Messages::create($chat_id, 'mentor', 'text', $lesson_content)) exit();
+
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
     }
 
     private function handleUserGeneratePractice(string $prompt, array $topic, array $level): void
@@ -423,20 +516,62 @@ class ChatController extends Controller
         }
     }
 
+    private function resolveCourse(bool $useJson = false)
+    {
+        if (!Yii::$app->user->isGuest) {
+            $course_id = Yii::$app->user->identity->activeData['course_id'];
+        } else {
+            $course_id = (int) (Yii::$app->request->getBodyParam('course_id') ?? 0);
+        }        
+
+        if (!$course_id) {
+            $this->failWith("Ma'lumotlar to'liq emas! Iltimos sahifani qayta yuklang", $useJson);
+        }
+
+        $course = Courses::find()
+            ->select(['id', 'mentor_id', 'name'])
+            ->where(['id' => $course_id])
+            ->with([
+                'mentor' => function ($query) {
+                    $query->select(['id', 'name', 'personality']);
+                }
+            ])
+            ->asArray()
+            ->one();
+
+        if (!$course) {
+            $this->failWith(
+                "Bunday kurs mavjud emas. Iltimos sahifani qayta yuklang",
+                $useJson
+            );
+        }
+
+        return $course;
+    }
+
     /**
      * Topic_id bo'yicha mavzuni qaytaradi.
      */
-    private function resolveTopic(int $topic_id, bool $useJson = false): array
+    private function resolveTopic(int $topic_id, int $course_id, bool $useJson = false): array
     {
         if (!$topic_id) {
             $this->failWith("Ma'lumotlar to'liq emas! Iltimos sahifani qayta yuklang", $useJson);
         }
 
-        $topic = Topics::getTopicById($topic_id);
+        $topic = Topics::find()
+            ->alias('t')
+            ->select(['t.id', 't.module_id', 't.type', 't.title', 'key_concepts'])
+            ->innerJoin('course_modules cm', 'cm.module_id = t.module_id')
+            ->where([
+                't.id' => $topic_id,
+                'cm.course_id' => $course_id
+            ])
+            ->asArray()
+            ->one();
 
         if (!$topic) {
             $this->failWith(
-                "Bunday mavzu topilmadi! Mavzu mavzular ro'yxatidan chiqib ketgan bo'lishi mumkin. Iltimos sahifani qayta yuklang",
+                "Bunday mavzu topilmadi! Mavzu kursdan chiqib ketgan bo'lishi mumkin. Iltimos sahifani qayta yuklang",
                 $useJson
             );
         }
@@ -452,8 +587,7 @@ class ChatController extends Controller
     private function resolveLevel(bool $useJson = false): array
     {
         if (!Yii::$app->user->isGuest) {
-            // TODO: Yii::$app->user->identity->level_id — profil tayyor bo'lgandan keyin
-            $level_id = (int) Yii::$app->session->get('level_id', 0);
+            $level_id = Yii::$app->user->identity->activeData['level_id'];
         } else {
             $level_id = (int) (Yii::$app->request->getBodyParam('level_id') ?? 0);
         }
@@ -462,7 +596,11 @@ class ChatController extends Controller
             $this->failWith("Ma'lumotlar to'liq emas! Iltimos sahifani qayta yuklang", $useJson);
         }
 
-        $level = Levels::getLevelById($level_id);
+        $level = Levels::find()
+            ->select(['title', 'description'])
+            ->where(['id' => $level_id])
+            ->asArray()
+            ->one();
 
         if (!$level) {
             $this->failWith(
@@ -472,6 +610,24 @@ class ChatController extends Controller
         }
 
         return $level;
+    }
+ 
+    // faqat userlar uchun
+    private function resolveChat(int $topic_id) {
+        $data = Chats::find()
+            ->select(['id'])
+            ->where(['topic_id' => $topic_id, "user_data_id" => Yii::$app->user->identity->last_active_user_data_id])
+            ->asArray()
+            ->one();
+
+        if (!$data) {
+            $new_chat = Chats::create($topic_id, 1);
+
+            if (!$new_chat['success']) return false;
+            return $new_chat['id'];
+        } else {
+            return $data['id'];
+        }
     }
 
     /**
@@ -530,8 +686,6 @@ class ChatController extends Controller
         } catch (\Throwable $e) {
             $this->sendStreamError($this->resolveStreamErrorMessage($e));
         }
-
-        exit(0);
     }
 
     private function resolveStreamErrorMessage(\Throwable $e): string

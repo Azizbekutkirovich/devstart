@@ -1,0 +1,531 @@
+/* ════════ MAIN PAGE ════════ */
+.start-page {
+  min-height: 100vh;
+  padding: 100px 20px 80px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.start-page::before {
+  content: '';
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 229, 255, .05), transparent);
+  top: 5%;
+  right: 5%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.start-wrapper {
+  width: 100%;
+  max-width: 700px;
+}
+
+/* Course header */
+.course-header {
+  margin-bottom: 36px;
+  animation: fadeUp .5s ease both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.course-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: rgba(0, 229, 255, .06);
+  border: 1px solid rgba(0, 229, 255, .2);
+  border-radius: 100px;
+  font-family: 'Space Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .08em;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.course-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: -.03em;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.course-title span {
+  color: var(--accent);
+}
+
+.course-desc {
+  color: var(--text-muted);
+  font-size: .92rem;
+  max-width: 500px;
+}
+
+/* Progress Steps */
+.progress-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px;
+  box-shadow: 0 24px 80px var(--shadow);
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp .5s .1s ease both;
+}
+
+.progress-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: .4;
+}
+
+/* Step indicator row */
+.steps-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+}
+
+.step-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-family: 'Space Mono', monospace;
+  font-size: .72rem;
+  font-weight: 700;
+  border: 2px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-muted);
+  transition: all .4s;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.step-dot.active {
+  border-color: var(--accent);
+  background: rgba(0, 229, 255, .1);
+  color: var(--accent);
+  box-shadow: 0 0 16px rgba(0, 229, 255, .2);
+}
+
+.step-dot.done {
+  border-color: var(--accent4);
+  background: rgba(168, 255, 120, .1);
+  color: var(--accent4);
+}
+
+.step-dot.done::after {
+  content: '✓';
+  font-size: .8rem;
+}
+
+.step-dot.done .step-num {
+  display: none;
+}
+
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  transition: background .4s;
+  position: relative;
+}
+
+.step-connector.done {
+  background: var(--accent);
+}
+
+.step-connector::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--accent));
+  opacity: 0;
+  transition: opacity .6s;
+}
+
+.step-connector.active::after {
+  opacity: 1;
+}
+
+.steps-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 8px;
+}
+
+.step-label {
+  font-size: .75rem;
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: .02em;
+  text-align: center;
+  flex: 1;
+  transition: color .3s;
+}
+
+.step-label.active {
+  color: var(--accent);
+}
+
+.step-label.done {
+  color: var(--accent4);
+}
+
+/* Progress bar */
+.progress-bar-wrap {
+  background: var(--surface2);
+  border-radius: 100px;
+  height: 6px;
+  margin-bottom: 36px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  box-shadow: 0 0 10px var(--accent);
+  transition: width .8s cubic-bezier(.34, 1.56, .64, 1);
+  width: 0%;
+}
+
+/* Step panels */
+.step-panel {
+  display: none;
+}
+
+.step-panel.active {
+  display: block;
+  animation: fadeUp .4s ease both;
+}
+
+/* Step 1 – Level selection */
+.step-heading {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.step-sub {
+  color: var(--text-muted);
+  font-size: .88rem;
+  margin-bottom: 24px;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.level-card {
+  padding: 20px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  cursor: pointer;
+  transition: all .25s;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.level-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .3s;
+}
+
+.level-card.level-1::before {
+  background: radial-gradient(circle at 50% 0%, rgba(168, 255, 120, .06), transparent);
+}
+
+.level-card.level-2::before {
+  background: radial-gradient(circle at 50% 0%, rgba(0, 229, 255, .06), transparent);
+}
+
+.level-card.level-3::before {
+  background: radial-gradient(circle at 50% 0%, rgba(123, 47, 255, .06), transparent);
+}
+
+.level-card:hover {
+  transform: translateY(-3px);
+}
+
+.level-card.level-1:hover {
+  border-color: rgba(168, 255, 120, .4);
+  box-shadow: 0 8px 24px rgba(168, 255, 120, .1);
+}
+
+.level-card.level-2:hover {
+  border-color: rgba(0, 229, 255, .4);
+  box-shadow: 0 8px 24px rgba(0, 229, 255, .1);
+}
+
+.level-card.level-3:hover {
+  border-color: rgba(123, 47, 255, .4);
+  box-shadow: 0 8px 24px rgba(123, 47, 255, .1);
+}
+
+.level-card.selected.level-1 {
+  border-color: var(--accent4);
+  background: rgba(168, 255, 120, .06);
+  box-shadow: 0 0 0 3px rgba(168, 255, 120, .1);
+}
+
+.level-card.selected.level-2 {
+  border-color: var(--accent);
+  background: rgba(0, 229, 255, .06);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, .1);
+}
+
+.level-card.selected.level-3 {
+  border-color: var(--accent2);
+  background: rgba(123, 47, 255, .06);
+  box-shadow: 0 0 0 3px rgba(123, 47, 255, .1);
+}
+
+.level-card.selected::before {
+  opacity: 1;
+}
+
+.level-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.level-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .85rem;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.level-card.level-1 .level-name {
+  color: var(--accent4);
+}
+
+.level-card.level-2 .level-name {
+  color: var(--accent);
+}
+
+.level-card.level-3 .level-name {
+  color: #a78bfa;
+}
+
+.level-desc {
+  font-size: .75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Step 2 – Try or register */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.action-card {
+  padding: 28px 22px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  cursor: pointer;
+  transition: all .25s;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-card.try:hover {
+  border-color: rgba(0, 229, 255, .4);
+  background: rgba(0, 229, 255, .04);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 229, 255, .08);
+}
+
+.action-card.register {
+  border-color: rgba(123, 47, 255, .2);
+}
+
+.action-card.register:hover {
+  border-color: rgba(123, 47, 255, .5);
+  background: rgba(123, 47, 255, .04);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(123, 47, 255, .1);
+}
+
+.action-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.action-card.try .action-icon {
+  background: rgba(0, 229, 255, .08);
+  border: 1px solid rgba(0, 229, 255, .2);
+  color: var(--accent);
+}
+
+.action-card.register .action-icon {
+  background: rgba(123, 47, 255, .08);
+  border: 1px solid rgba(123, 47, 255, .2);
+  color: #a78bfa;
+}
+
+.action-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--text);
+}
+
+.action-desc {
+  font-size: .78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Buttons */
+.btn-primary {
+  padding: 13px 28px;
+  background: var(--accent);
+  color: #000;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .88rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all .25s;
+  letter-spacing: .02em;
+  box-shadow: 0 0 28px rgba(0, 229, 255, .2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 45px rgba(0, 229, 255, .35);
+}
+
+.btn-primary:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-ghost {
+  padding: 13px 28px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: .88rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all .25s;
+}
+
+.btn-ghost:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+/* RESPONSIVE */
+@media(max-width:900px) {
+  .progress-card {
+    padding: 24px 20px;
+  }
+
+  .level-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* RESPONSIVE */
+@media(max-width:600px) {
+  .step-nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .step-nav .btn-primary,
+  .step-nav .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media(max-width:480px) {
+  .course-title {
+    font-size: 1.5rem;
+  }
+}

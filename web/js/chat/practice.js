@@ -24,6 +24,7 @@ async function startPractice() {
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({
+          course_id: urlParams.get('course_id'),
           topic_id: urlParams.get('topic_id'),
           level_id: urlParams.get('level_id'),
           lesson_content,
@@ -69,6 +70,7 @@ async function checkPracticeTask() {
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({
+          course_id: urlParams.get('course_id'),
           topic_id: urlParams.get('topic_id'),
           level_id: urlParams.get('level_id'),
           practices,

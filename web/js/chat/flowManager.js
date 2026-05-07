@@ -16,30 +16,21 @@
 //    removeBtn — bosilgandan oldin button o'chirilsinmi?
 //
 const FLOWS = {
-
-  // Standart to'liq oqim
-  default: [
-    { id: 'topic',    label: 'Mavzuni boshlash',              action: 'startTopic',    removeBtn: true  },
-    { id: 'quiz',     label: 'Mavzuga oid testlar',           action: 'startTest',     removeBtn: true  },
-    { id: 'practice', label: 'Mavzuga oid amaliy topshiriq', action: 'startPractice', removeBtn: true  },
-    { id: 'end',      label: "Keyingi mavzuga o'tish ➡️",    action: 'nextTopic',     removeBtn: false },
-  ],
-
   // lesson
   lesson: [
-    { id: 'topic',    label: 'Mavzuni boshlash',              action: 'startTopic',    removeBtn: true  },
-    { id: 'quiz',     label: 'Mavzuga oid testlar',           action: 'startTest',     removeBtn: true  },
-    { id: 'practice', label: 'Mavzuga oid amaliy topshiriq', action: 'startPractice', removeBtn: true  },
+    { id: 'topic',    label: 'Darsni boshlash',              action: 'startTopic',    removeBtn: true  },
+    { id: 'quiz',     label: 'Quiz testlar',           action: 'startTest',     removeBtn: true  },
+    { id: 'practice', label: 'Amaliy topshiriqlar', action: 'startPractice', removeBtn: true  },
     { id: 'end',      label: "Keyingi mavzuga o'tish ➡️",    action: 'nextTopic',     removeBtn: false },
   ],
 
   theory: [
-    { id: 'topic', label: 'Mavzuni boshlash',           action: 'startTopic', removeBtn: true },
+    { id: 'topic', label: 'Darsni boshlash',           action: 'startTopic', removeBtn: true },
     { id: 'end',   label: "Keyingi mavzuga o'tish ➡️", action: 'nextTopic',  removeBtn: false },
   ],
 
   setup: [
-    { id: 'topic', label: 'Mavzuni boshlash',           action: 'startTopic', removeBtn: true },
+    { id: 'topic', label: 'Darsni boshlash',           action: 'startTopic', removeBtn: true },
     { id: 'end',   label: "Keyingi mavzuga o'tish ➡️", action: 'nextTopic',  removeBtn: false },
   ],
 };

@@ -17,7 +17,7 @@ class SelectedForm extends Model
             [['course_id'], 'exist',
                 'targetClass' => Courses::class,
                 'targetAttribute' => 'id',
-                'message' => "Bunday soha va til mavjud emas!"
+                'message' => "Bunday kurs mavjud emas!"
             ],
             [['level_id'], 'exist',
             	'targetClass' => Levels::class,
@@ -26,11 +26,4 @@ class SelectedForm extends Model
         	]
         ];
     }
-
-    public function scenarios()
-	{
-		$scenarios = parent::scenarios();
-	    $scenarios['scenarioWithChat'] = ['level_id'];
-	    return $scenarios;
-	}
 }

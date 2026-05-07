@@ -31,8 +31,9 @@ async function startTopic() {
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({
+          course_id: urlParams.get('course_id'),
           topic_id: urlParams.get('topic_id'),
-          level_id: urlParams.get('level_id'),
+          level_id: urlParams.get('level_id')
         }),
       },
       _handleTopicChunk
@@ -141,15 +142,32 @@ function typeText(container, html, callback) {
   }
 
   let index = 0;
-  container.innerHTML = '<span>🤖 </span>';
+  container.innerHTML = `<span><img src="${botAvatar}" alt="Robot" style="width: 70px; height: auto; z-index: 2;">`;
 
   const interval = setInterval(() => {
-    container.innerHTML = `<span>🤖 ${html.substring(0, index)}</span>`;
+    container.innerHTML = `<span><img src="${botAvatar}" alt="Robot" style="width: 70px; height: auto; z-index: 2;"> ${html.substring(0, index)}</span>`;
     index++;
 
     if (index > html.length) {
       clearInterval(interval);
+
+      // SVG kodlarini rasmga aylantirish
+      // const svgElements = container.querySelectorAll('pre, code'); // AI ko'pincha kod blokiga o'raydi
+      // svgElements.forEach(el => {
+      //     const content = el.textContent.trim();
+      //     if (content.startsWith('<svg') && content.endsWith('</svg>')) {
+      //         const wrapper = document.createElement('div');
+      //         wrapper.className = 'svg-diagram-container';
+      //         wrapper.style.textAlign = 'center';
+      //         wrapper.style.margin = '20px 0';
+      //         wrapper.innerHTML = content; // Mana shu joyda matn haqiqiy SVG rasmga aylanadi
+      //         el.parentNode.replaceChild(wrapper, el);
+      //     }
+      // });
+      // activateInteractiveSection();
+     
       applyHighlighting(container);
+
       chatInput.style.display = 'flex';
       isTyping = false;
       callback?.();
@@ -167,3 +185,14 @@ function _resetTopicState() {
   messageCount    = 0;
   firstLoader     = null;
 }
+
+
+function restoreText(text, message_sender) {
+  content = marked.parse(text);
+  message_sender(content);
+}
+
+// restoreText(`Assalomu alaykum aziz o'quvchi! Bugungi bizning birinchi darsimiz "Kirish: Algoritm tushunchasi"`, addBotMessage);
+
+// flowName = document.querySelector('meta[name="topic-flow"]')?.getAttribute('content') || 'default';
+// FlowManager.init(flowName, 1);

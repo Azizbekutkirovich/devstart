@@ -15,7 +15,6 @@ use Yii;
 class Levels extends \yii\db\ActiveRecord
 {
 
-
     /**
      * {@inheritdoc}
      */
@@ -30,19 +29,9 @@ class Levels extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name'], 'required'],
-            [['name'], 'string', 'max' => 256],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'name' => 'Name',
+            [['title', 'description', 'icon'], 'required'],
+            [['description'], 'string'],
+            [['title', 'icon'], 'string', 'max' => 256],
         ];
     }
 
@@ -56,13 +45,13 @@ class Levels extends \yii\db\ActiveRecord
         return $this->hasMany(UserData::class, ['level_id' => 'id']);
     }
 
-    public static function getAllLevels() {
+    public static function getAll() {
         return self::find()
             ->asArray()
             ->all();
     }
 
-    public static function getLevelById($id) {
+    public static function getById($id) {
         return self::find()->asArray()->select(['name'])->where(['id' => $id])->one();
     }
 }

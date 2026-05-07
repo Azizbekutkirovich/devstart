@@ -52,6 +52,7 @@ async function askQuestionAboutTopic(userQuestion) {
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({
+          course_id: urlParams.get('course_id'),
           topic_id: urlParams.get('topic_id'),
           level_id: urlParams.get('level_id'),
           user_question: userQuestion,

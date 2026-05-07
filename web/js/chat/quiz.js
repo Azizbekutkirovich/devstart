@@ -17,6 +17,7 @@ function startTest() {
     dataType: 'json',
     contentType: 'application/json',
     data: JSON.stringify({
+      course_id: urlParams.get('course_id'),
       topic_id: urlParams.get('topic_id'),
       level_id: urlParams.get('level_id'),
       lesson_content,

@@ -1,0 +1,270 @@
+/* ─── PAGE HEADER ─── */
+.page-header {
+	padding: 130px 60px 60px;
+	position: relative;
+	z-index: 1;
+	overflow: hidden;
+}
+
+.page-header-orb {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(100px);
+	pointer-events: none;
+	width: 500px;
+	height: 400px;
+	background: radial-gradient(circle, rgba(0, 229, 255, 0.1), transparent 70%);
+	top: -100px;
+	right: -100px;
+}
+
+.page-header-inner {
+	max-width: 1200px;
+	margin: 0 auto;
+	position: relative;
+	z-index: 2;
+}
+
+.page-breadcrumb {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-family: 'Space Mono', monospace;
+	font-size: 0.7rem;
+	color: var(--text-muted);
+	letter-spacing: 0.1em;
+	margin-bottom: 24px;
+}
+
+.page-breadcrumb a {
+	color: var(--accent);
+	text-decoration: none;
+}
+
+.page-breadcrumb span {
+	opacity: 0.5;
+}
+
+.page-header-tag {
+	font-family: 'Space Mono', monospace;
+	font-size: .7rem;
+	color: var(--accent);
+	letter-spacing: .2em;
+	text-transform: uppercase;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+.page-header-tag::before {
+	content: '';
+	width: 30px;
+	height: 1px;
+	background: var(--accent);
+}
+
+.page-header h1 {
+	font-family: 'Syne', sans-serif;
+	font-weight: 800;
+	font-size: clamp(2.4rem, 5vw, 4rem);
+	letter-spacing: -.04em;
+	line-height: 1;
+	color: var(--text);
+	margin-bottom: 16px;
+}
+
+.page-header p {
+	color: var(--text-muted);
+	font-size: 1.05rem;
+	max-width: 500px;
+	line-height: 1.7;
+	font-weight: 300;
+}
+
+/* ─── COURSES MAIN ─── */
+.courses-main {
+	position: relative;
+	z-index: 1;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 60px 60px 100px;
+}
+
+.courses-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 24px;
+}
+
+/* ─── COURSE CARD ─── */
+.course-card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 20px;
+	overflow: hidden;
+	transition: all .4s;
+	display: flex;
+	flex-direction: column;
+}
+
+.course-card:hover {
+	transform: translateY(-6px);
+	border-color: rgba(0, 229, 255, .3);
+	box-shadow: 0 20px 60px var(--shadow);
+}
+
+.course-thumb {
+	width: 100%;
+	height: 200px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	overflow: hidden;
+}
+
+.course-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	transition: transform .4s ease;
+}
+
+.course-card:hover .course-thumb img {
+	transform: scale(1.04);
+}
+
+.course-body {
+	padding: 24px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.course-title {
+	font-family: 'Syne', sans-serif;
+	font-weight: 700;
+	font-size: 1.05rem;
+	letter-spacing: -.01em;
+	line-height: 1.3;
+	color: var(--text);
+}
+
+.course-mentor {
+	font-size: .82rem;
+	color: var(--accent2);
+	font-weight: 500;
+}
+
+.course-desc {
+	color: var(--text-muted);
+	font-size: .85rem;
+	line-height: 1.6;
+	font-weight: 300;
+	flex: 1;
+}
+
+.course-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid var(--border);
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.course-meta {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.course-meta-item {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: .78rem;
+	color: var(--text-muted);
+}
+
+.course-meta-item svg {
+	opacity: .5;
+}
+
+.btn-course {
+	padding: 8px 18px;
+	background: transparent;
+	border: 1px solid var(--accent);
+	color: var(--accent);
+	border-radius: 8px;
+	font-family: 'Syne', sans-serif;
+	font-weight: 600;
+	font-size: .78rem;
+	cursor: pointer;
+	text-decoration: none;
+	transition: all .25s;
+	letter-spacing: .02em;
+	white-space: nowrap;
+}
+
+.btn-course:hover {
+	background: rgba(0, 229, 255, .08);
+	transform: translateY(-1px);
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+	grid-column: 1 / -1;
+	text-align: center;
+	padding: 80px 40px;
+}
+
+.empty-icon {
+	font-size: 3rem;
+	margin-bottom: 16px;
+	opacity: 0.5;
+}
+
+.empty-title {
+	font-family: 'Syne', sans-serif;
+	font-weight: 700;
+	font-size: 1.5rem;
+	color: var(--text);
+	margin-bottom: 10px;
+}
+
+.empty-desc {
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px) {
+	.page-header {
+		padding: 110px 24px 50px;
+	}
+
+	.filter-bar {
+		padding: 16px 24px;
+	}
+
+	.courses-main {
+		padding: 40px 24px 70px;
+	}
+
+	.courses-grid {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+@media(max-width:600px) {
+	.courses-grid {
+		grid-template-columns: 1fr;
+	}
+}

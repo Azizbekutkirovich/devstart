@@ -31,6 +31,14 @@ class LoginForm extends Model
         ];
     }
 
+    public function attributeLabels()
+    {
+        return [
+            'email' => 'EMAIL',
+            'password' => 'PAROL'
+        ];
+    }
+
     public function scenarios() {
         $scenarios = parent::scenarios();
         $scenarios['scenarioWithGoogle'] = ['email'];

@@ -33,7 +33,6 @@ function addBotMessage(html) {
   div.className = 'message bot';
   div.innerHTML = html;
   chat.appendChild(div);
-  // scrollToBottom();
 }
 
 function createBotMessageContainer() {
@@ -59,8 +58,13 @@ function showLoader(container) {
   const div = document.createElement('div');
   div.className = 'loader-wrapper';
   div.innerHTML = `
-    <div class="robot-loader">🤖</div>
-    <div class="loader-text">Bot o'ylayapti, biroz kuting...</div>
+  <div class="loader-container">
+    <div class="robot-wrapper">
+      <img src="${botAvatar}" alt="Robot" class="loader-img">
+      <div class="pulse-ring"></div>
+    </div>
+    <div class="loader-text">AI o'ylayapti<span class="dots">...</span></div>
+  </div>
   `;
   container.appendChild(div);
   return div;
@@ -84,6 +88,10 @@ function applyHighlighting(container) {
 // ── Copy tugmalari ──────────────────────────
 function addCopyButtons(root = document) {
   root.querySelectorAll('pre:not(.copy-added)').forEach((pre) => {
+    if (pre.closest('.interactive-section')) {
+      return; 
+    }
+
     pre.classList.add('copy-added');
     pre.style.position = 'relative';
 
@@ -106,14 +114,18 @@ function addCopyButtons(root = document) {
 }
 
 // Yangi qo'shilgan elementlarga avtomatik copy tugma
-const copyObserver = new MutationObserver((mutations) => {
-  for (const mutation of mutations) {
-    for (const node of mutation.addedNodes) {
-      if (node.nodeType === 1) addCopyButtons(node);
-    }
-  }
-});
-copyObserver.observe(document.body, { childList: true, subtree: true });
+// const copyObserver = new MutationObserver((mutations) => {
+//   for (const mutation of mutations) {
+//     for (const node of mutation.addedNodes) {
+//       if (node.nodeType === 1) {
+//         if (node.closest('.interactive-section')) continue;
+//         addCopyButtons(node);
+//       }
+//     }
+//   }
+// });
+
+// copyObserver.observe(document.body, { childList: true, subtree: true });
 
 // ── SSE Streaming ───────────────────────────
 /**
@@ -178,12 +190,60 @@ function makeStreamingRenderer(messageDiv, loader) {
       messageDiv.classList.add('bot');
       isFirstChunk = false;
     }
-    messageDiv.innerHTML = `<span>🤖 ${marked.parse(allContent)}</span>`;
+    messageDiv.innerHTML = `
+      <span>
+        <img src="${botAvatar}" alt="Robot" style="width: 70px; height: auto; z-index: 2;">
+        ${marked.parse(allContent)}
+      </span>
+    `;
     applyHighlighting(messageDiv);
   };
 }
 
+function activateInteractiveSection() {
+    const container = document.querySelector('.interactive-section');
+    if (!container) return;
+
+    // 1. Observerni vaqtincha to'xtatamiz
+    // copyObserver.disconnect();
+
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        newScript.textContent = oldScript.textContent;
+        
+        // Bu amal observerni qo'zg'atmaydi, chunki u disconnect qilingan
+        document.body.appendChild(newScript);
+        document.body.removeChild(newScript);
+    });
+
+    // 2. Ikonkalarni chizish
+    if (window.lucide) {
+        window.lucide.createIcons({ src: container });
+    }
+
+    // 3. Observerni qayta ishga tushiramiz
+    // 'chat' divini yoki asosiy konteynerni kuzatishni davom ettiradi
+    // copyObserver.observe(document.getElementById('chat'), {
+    //     childList: true,
+    //     subtree: true
+    // });
+}
+
+function applyHighlighting(container) {
+    // Interaktiv section ichida bo'lmagan 'pre code'larni topamiz
+    const codeBlocks = container.querySelectorAll('pre code');
+    
+    codeBlocks.forEach(code => {
+        // Agar kod bloki .interactive-section ichida bo'lsa, uni o'tkazib yuboramiz
+        if (code.closest('.interactive-section')) return;
+
+        // Faqat oddiy kod bloklarini highlight qilamiz
+        hljs.highlightElement(code);
+    });
+}
+
 // ── Marked konfiguratsiyasi ──────────────────
 marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
-hljs.highlightAll();
-addCopyButtons();
+// hljs.highlightAll();
+// addCopyButtons();

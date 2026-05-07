@@ -62,8 +62,15 @@ class RegisterForm extends Model
 				throw new \Exception("CREATE_USER_FAILED");
 			}
 
-			if (!$this->saveUserData($user->id, $course_id, $level_id)) {
+			$user_data = $this->saveUserData($user->id, $course_id, $level_id);
+			if (!$user_data['success']) {
 				throw new \Exception("SAVE_USER_DATA_FAILED");
+			}
+
+			$user->last_active_user_data_id = $user_data['id'];
+			
+			if (!$user->save(false)) {
+				throw new \Exception("CREATE_USER_FAILED");
 			}
 
 			$transaction->commit();
@@ -91,6 +98,9 @@ class RegisterForm extends Model
 		$user_data->user_id = $user_id;
 		$user_data->course_id = $course_id;
 		$user_data->level_id = $level_id;
-		return $user_data->save(false);
+		return [
+			"success" => $user_data->save(false),
+			"id" => $user_data->id
+		];
 	}
 }

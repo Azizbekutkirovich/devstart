@@ -3,18 +3,21 @@
 namespace app\models;
 
 use Yii;
+use app\models\queries\CourseQuery;
 
 /**
  * This is the model class for table "courses".
  *
  * @property int $id
- * @property int|null $category_id
- * @property int|null $language_id
- * @property string|null $language_title
+ * @property int $mentor_id
+ * @property string $name
+ * @property string $title
+ * @property string $img
  *
- * @property Categories $category
- * @property Languages $language
- * @property Topics[] $topics
+ * @property CourseModules[] $courseModules
+ * @property Mentors $mentor
+ * @property Modules[] $modules
+ * @property UserData[] $userDatas
  */
 class Courses extends \yii\db\ActiveRecord
 {
@@ -34,11 +37,11 @@ class Courses extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['category_id', 'language_id', 'language_title'], 'default', 'value' => null],
-            [['category_id', 'language_id'], 'integer'],
-            [['language_title'], 'string', 'max' => 512],
-            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::class, 'targetAttribute' => ['category_id' => 'id']],
-            [['language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Languages::class, 'targetAttribute' => ['language_id' => 'id']],
+            [['mentor_id', 'name', 'title', 'img'], 'required'],
+            [['mentor_id'], 'integer'],
+            [['title'], 'string'],
+            [['name', 'img'], 'string', 'max' => 256],
+            [['mentor_id'], 'exist', 'skipOnError' => true, 'targetClass' => Mentors::class, 'targetAttribute' => ['mentor_id' => 'id']],
         ];
     }
 
@@ -49,40 +52,61 @@ class Courses extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'category_id' => 'Category ID',
-            'language_id' => 'Language ID',
-            'language_title' => 'Language Title',
+            'mentor_id' => 'Mentor ID',
+            'name' => 'Name',
+            'title' => 'Title',
+            'img' => 'Img',
         ];
     }
 
     /**
-     * Gets query for [[Category]].
+     * Gets query for [[CourseModules]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getCategory()
+    public function getCourseModules()
     {
-        return $this->hasOne(Categories::class, ['id' => 'category_id']);
+        return $this->hasMany(CourseModules::class, ['course_id' => 'id']);
     }
 
     /**
-     * Gets query for [[Language]].
+     * Gets query for [[Mentor]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getLanguage()
+    public function getMentor()
     {
-        return $this->hasOne(Languages::class, ['id' => 'language_id']);
+        return $this->hasOne(Mentors::class, ['id' => 'mentor_id']);
     }
 
     /**
-     * Gets query for [[Topics]].
+     * Gets query for [[Modules]].
      *
      * @return \yii\db\ActiveQuery
      */
+    public function getModules()
+    {
+        return $this->hasMany(Modules::class, ['id' => 'module_id'])->viaTable('course_modules', ['course_id' => 'id']);
+    }
+
     public function getTopics()
     {
-        return $this->hasMany(Topics::class, ['course_id' => 'id']);
+        return $this->hasMany(Topics::class, ['module_id' => 'id'])
+                    ->via('modules');
     }
 
+    /**
+     * Gets query for [[UserDatas]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserDatas()
+    {
+        return $this->hasMany(UserData::class, ['course_id' => 'id']);
+    }
+
+    public static function find()
+    {
+        return new CourseQuery(get_called_class());
+    }
 }

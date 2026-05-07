@@ -8,12 +8,13 @@ use Yii;
  * This is the model class for table "topics".
  *
  * @property int $id
- * @property int|null $course_id
- * @property string $type
- * @property string|null $title
- * @property string $key_concepts
+ * @property int $module_id
+ * @property string|null $type
+ * @property string $title
+ * @property string|null $key_concepts
+ * @property int|null $order_weight
  *
- * @property Courses $course
+ * @property Modules $module
  */
 class Topics extends \yii\db\ActiveRecord
 {
@@ -33,13 +34,14 @@ class Topics extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['course_id', 'title'], 'default', 'value' => null],
-            [['course_id'], 'integer'],
-            [['type', 'key_concepts'], 'required'],
-            [['type'], 'string', 'max' => 20],
+            [['type', 'key_concepts'], 'default', 'value' => null],
+            [['order_weight'], 'default', 'value' => 0],
+            [['module_id', 'title'], 'required'],
+            [['module_id', 'order_weight'], 'integer'],
+            [['key_concepts'], 'safe'],
+            [['type'], 'string', 'max' => 50],
             [['title'], 'string', 'max' => 100],
-            [['key_concepts'], 'string', 'max' => 256],
-            [['course_id'], 'exist', 'skipOnError' => true, 'targetClass' => Courses::class, 'targetAttribute' => ['course_id' => 'id']],
+            [['module_id'], 'exist', 'skipOnError' => true, 'targetClass' => Modules::class, 'targetAttribute' => ['module_id' => 'id']],
         ];
     }
 
@@ -50,62 +52,22 @@ class Topics extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'course_id' => 'Course ID',
+            'module_id' => 'Module ID',
             'type' => 'Type',
             'title' => 'Title',
             'key_concepts' => 'Key Concepts',
+            'order_weight' => 'Order Weight',
         ];
     }
 
     /**
-     * Gets query for [[Course]].
+     * Gets query for [[Module]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getCourse()
+    public function getModule()
     {
-        return $this->hasOne(Courses::class, ['id' => 'course_id']);
+        return $this->hasOne(Modules::class, ['id' => 'module_id']);
     }
 
-    public static function getTopicsByCourseId(int $course_id) {
-        $topics = self::find()->asArray()->select(['id', 'course_id', 'title'])->where(['course_id' => $course_id])->with(['course.category', 'course.language'])->all();
-
-        $sections = array_chunk($topics, 7);
-
-        $result = [
-            "category" => $topics[0]["course"]["category"]["name"] ?? null,
-            "language" => $topics[0]["course"]["language"]["name"] ?? null,
-            "data" => array_map(function ($sectionTopics, $index) {
-                        return [
-                            'id' => $index + 1,
-                            'name' => ($index + 1) . "-bo'lim",
-                            'topics' => array_map(function ($topic) {
-                                return [
-                                    'id' => $topic['id'],
-                                    'title' => $topic['title'],
-                                ];
-                            }, $sectionTopics)
-                        ];
-                }, $sections, array_keys($sections))
-        ];
-
-        return $result;
-    }
-
-    public static function getTopicById(int $id) {
-        $data = self::find()->asArray()->where(['id' => $id])->with(['course.category', 'course.language'])->one();
-
-        if (!$data) {
-            return null;
-        }
-
-        return [
-            "id" => $data['id'],
-            "type" => $data['type'],
-            "title" => $data['title'],
-            "key_concepts" => $data['key_concepts'],
-            "category" => $data['course']['category']['name'] ?? null,
-            "language" => $data['course']['language']['name'] ?? null
-        ];
-    }
 }
