@@ -14,6 +14,7 @@ use Yii;
  * @property string|null $key_concepts
  * @property int|null $order_weight
  *
+ * @property Chats[] $chats
  * @property Modules $module
  */
 class Topics extends \yii\db\ActiveRecord
@@ -58,6 +59,16 @@ class Topics extends \yii\db\ActiveRecord
             'key_concepts' => 'Key Concepts',
             'order_weight' => 'Order Weight',
         ];
+    }
+
+    /**
+     * Gets query for [[Chats]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getChats()
+    {
+        return $this->hasMany(Chats::class, ['topic_id' => 'id']);
     }
 
     /**

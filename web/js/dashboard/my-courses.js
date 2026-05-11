@@ -28,3 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
       setProgress(percent, bar);
   });
 });
+
+function changeCourse(user_data_id) {
+  window.location.href = `${change_course_url}?user_data_id=${user_data_id}`;
+}

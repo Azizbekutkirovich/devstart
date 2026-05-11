@@ -24,7 +24,7 @@ class Users extends ActiveRecord implements \yii\web\IdentityInterface
 
 	public static function findIdentity($id)
 	{
-		return self::find()->select(["id", "fullname", "email", "last_active_user_data_id"])->where(['id' => $id])->one();
+		return self::find()->select(["id", "fullname", "email", "email_verified", "last_active_user_data_id"])->where(['id' => $id])->one();
 	}
 
 	public static function findIdentityByAccessToken($token, $type = null)

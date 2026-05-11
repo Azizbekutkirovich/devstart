@@ -487,46 +487,40 @@ body.light-mode .topic-item {
   gap: 8px;
 }
 
+/* Progress bar yo'lakchasi (bo'sh qismi) */
 .topic-bar-track {
   width: 120px;
-  height: 3px;
-  background: rgba(255, 255, 255, .06);
-  border-radius: 3px;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.1); /* Fon rangi */
+  border-radius: 10px;
   overflow: hidden;
+  margin-top: 4px;
+}
+
+/* To'ladigan qism */
+.topic-bar-fill {
+  height: 100%;
+  background-color: #3b82f6; /* Moviy rang (yoki xohlagan rangingiz) */
+  border-radius: 10px;
+  transition: width 0.3s ease; /* O'zgarish silliq bo'lishi uchun */
+}
+
+/* Matnli foiz ko'rsatkichi uchun (ixtiyoriy) */
+.topic-pct {
+  font-size: .7rem;
+  color: var(--muted);
+  margin-left: 8px;
+  min-width: 30px;
+  display: inline-block;
+}
+
+/* Agarda progress 100 bo'lsa, rangni yashilga o'zgartirish (qo'shimcha UX) */
+.topic-item .status-done + .topic-info .topic-bar-fill {
+  background-color: #10b981; /* Yashil rang */
 }
 
 body.light-mode .topic-bar-track {
   background: rgba(0, 0, 0, .06);
-}
-
-.topic-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-}
-
-.fill-100 {
-  width: 100%;
-  background: var(--green);
-}
-
-.fill-66 {
-  width: 66%;
-  background: #fbbf24;
-}
-
-.fill-33 {
-  width: 33%;
-  background: var(--accent2);
-}
-
-.fill-0 {
-  width: 0%;
-  background: var(--muted);
-}
-
-.topic-pct {
-  font-size: .7rem;
-  color: var(--muted);
 }
 
 .topic-btn {

@@ -97,7 +97,6 @@ $this->registerCssFile(Url::base()."/css/dashboard/home.css");
   <div class="section-label">Kurs modullari</div>
   <div class="modules-area">
 
-    <!-- MODULE 1 -->
     <?php $i = 1; ?>
     <?php foreach($modules as $module): ?>
     <div class="module-card <?php echo ($i == 1) ? "open" : ""; ?>" id="mod<?=$i?>">
@@ -121,11 +120,13 @@ $this->registerCssFile(Url::base()."/css/dashboard/home.css");
         </div>
         <?php foreach($module['topics'] as $topic): ?>
         <div class="topic-item">
-          <div class="topic-status status-<?php echo ($topic['progress'] === 100) ? "done" : (($topic['progress'] > 0) ? "progress" : "") ?>"><?php echo ($topic['progress'] === 100) ? "✓" : (($topic['progress'] > 0) ? "◕" : "▶") ?></div>
+          <div class="topic-status status-<?php echo ($topic['progress'] == 100) ? "done" : (($topic['progress'] > 0) ? "progress" : "") ?>"><?php echo ($topic['progress'] == 100) ? "✓" : (($topic['progress'] > 0) ? "◕" : "▶") ?></div>
           <div class="topic-info">
             <div class="topic-name"><?=$topic['title']?></div>
             <div class="topic-bar-row">
-              <div class="topic-bar-track"><div class="topic-bar-fill fill-<?=$topic['progress']?>"></div></div>
+              <div class="topic-bar-track">
+                <div class="topic-bar-fill" style="width: <?=$topic['progress']?>%"></div>
+              </div>
               <div class="topic-pct"><?=$topic['progress']?>%</div>
             </div>
           </div>

@@ -257,8 +257,4 @@ body.light-mode .cp-bg {
   .overlay.show {
     display: block;
   }
-
-  .overall-progress-label {
-    display: none;
-  }
 }

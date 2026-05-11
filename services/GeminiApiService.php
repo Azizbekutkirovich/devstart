@@ -79,7 +79,7 @@ class GeminiApiService
 
 	public function streamContent($prompt, $callback)
     {
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:streamGenerateContent?key=" . $this->api_key."&alt=sse";
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=" . $this->api_key."&alt=sse";
 
         $data = [
             "contents" => [

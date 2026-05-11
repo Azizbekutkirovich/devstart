@@ -529,6 +529,39 @@ body.light-mode .question-block {
   transform: none;
 }
 
+/* copy button */
+.copy-code-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.1); /* Shaffof fon */
+  color: #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  backdrop-filter: blur(4px); /* Orqa fonni bir oz xiralashtirish */
+}
+
+.copy-code-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: #3b82f6; /* Moviyroq chegara */
+}
+
+.copy-code-button:active {
+  transform: scale(0.95); /* Bosilganda kichrayish effekti */
+}
+
+/* Kod bloki uchun ota konteyner */
+pre {
+  position: relative; /* Button joylashishi uchun muhim */
+  padding-top: 2rem !important; /* Button matnni yopib qo'ymasligi uchun */
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .main {

@@ -8,17 +8,61 @@
 //    <script src="quiz.js"></script>
 //    <script src="practice.js"></script>
 //    <script src="chat.js"></script>
+//    <script src="restorer.js"></script>
 //    <script src="app.js"></script>
+//
+//  Backend yuborishi kerak bo'lgan MINIMUM:
+//
+//  <meta name="topic-flow" content="default">
+//
+//  <script>
+//    window.__USER_ROLE__ = "guest" | "user";
+//    window.__RESUME__ = {
+//      lesson_content:  "...",
+//      practices:       "...",
+//      topic_completed: true   ← bitta yangi boolean, shu yetarli
+//    };
+//    window.__CHAT_HISTORY__ = [...];
+//  </script>
 // ═══════════════════════════════════════════
 
-// ── Qaysi flow ishlatilishini server belgilaydi ──
-// Masalan: <meta name="topic-flow" content="quick">
-const flowName = document.querySelector('meta[name="topic-flow"]')?.getAttribute('content') || 'default';
-FlowManager.init(flowName);
+// ── 1. Tarixni tiklash ───────────────────────
+const _history  = window.__CHAT_HISTORY__;
+const _flowName = document.querySelector('meta[name="topic-flow"]')?.getAttribute('content') || 'default';
 
-// ── Barcha tugma bosilishlarini ushlash ──────
+if (_history?.length) {
+  restoreChat(_history);
+}
+
+// ── 2. Step ni aniqlash va FlowManager ──────
+//    Restore bo'lsa → inferStepFromHistory
+//    Yangi chat    → step 0
+const _inferred = _history?.length
+  ? inferStepFromHistory(_history)
+  : { step: 0, continueTopic: false, practiceInputs: false };
+
+if (window.__USER_ROLE__ == 'guest') {
+  FlowManager.init(_flowName, 0);
+} else {
+  FlowManager.init(_flowName, _inferred.step);
+}
+
+// ── 3. Qo'shimcha restore holatlari ──────────
+
+// Topic tugamagan: barcha qismlar ko'rsatilgan,
+// lekin foydalanuvchi "Davom etish" ni kutmoqda
+if (_inferred.continueTopic) {
+  createButton('Davom etish ➡', 'continue-topic');
+}
+
+// Practice content bor lekin javob yuborilmagan:
+// textarea larni va "Yuborish" tugmasini tiklash
+if (_inferred.practiceInputs) {
+  restorePracticeInputs();
+}
+
+// ── 4. Event listeners ───────────────────────
 chat.addEventListener('click', function (e) {
-  // Test varianti tanlash
   const option = e.target.closest('.option');
   if (option && chat.contains(option)) {
     selectTestOption(option);
@@ -26,9 +70,7 @@ chat.addEventListener('click', function (e) {
   }
 
   const button = e.target.closest('button');
-  if (!button) return;
-
-  _handleButtonClick(button.id);
+  if (button) _handleButtonClick(button.id, e);
 });
 
 chatInput.addEventListener('click', function (e) {
@@ -42,31 +84,15 @@ userInput.addEventListener('keydown', function (e) {
   }
 });
 
-// ── Markaziy button router ───────────────────
-function _handleButtonClick(btnId) {
-  // "Davom etish" — topic ichki tugmasi
-  if (btnId === 'continue-topic') {
-    handleContinue(event);
-    return;
-  }
-
-  // Test yakunlash tugmasi — maxsus holat
-  if (btnId === 'finishTest') {
-    checkingTest();
-    return;
-  }
-
-  // Javoblarni yuborish tugmasi — maxsus holat
-  if (btnId === 'validateTask') {
-    checkPracticeTask();
-    return;
-  }
-
-  // Barcha flow tugmalari: "flow-btn-topic", "flow-btn-quiz" ...
-  if (btnId.startsWith('flow-btn-')) {
-    FlowManager.handleButton(btnId);
-    return;
-  }
-
+// ── 5. Button router ─────────────────────────
+function _handleButtonClick(btnId, e) {
+  if (btnId === 'continue-topic')     { handleContinue(e); return; }
+  if (btnId === 'finishTest')         {  checkingTest();    return; }
+  if (btnId === 'validateTask')       { _removeBtn(btnId); checkPracticeTask(); return; }
+  if (btnId.startsWith('flow-btn-')) { FlowManager.handleButton(btnId); return; }
   console.warn('Noma\'lum tugma:', btnId);
+}
+
+function _removeBtn(id) {
+  document.getElementById(id)?.closest('.center-btn')?.remove();
 }

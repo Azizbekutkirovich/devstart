@@ -1,90 +1,89 @@
 // ═══════════════════════════════════════════
-//  topic.js — Mavzu yuklash va ko'rsatish
+//  topic.js — Mavzu yuklash (Guest + User rejimi)
 // ═══════════════════════════════════════════
 // Bog'liqlik: helpers.js, flowManager.js
 
-let lesson_content = '';
+// ── Rol va resume ma'lumotlari ───────────────
+const IS_GUEST = window.__USER_ROLE__ === 'guest';
+
+// lesson_content quiz/practice uchun kerak, resume dan tiklanadi
+let lesson_content  = window.__RESUME__?.lesson_content || '';
+
+// ── Shared holat ─────────────────────────────
+let isTyping  = false;
+let firstLoader = null;
+
+// ── Guest-only holat ─────────────────────────
 let messageQueue   = [];
 let currentBuffer  = '';
-let isTyping       = false;
 let isStreaming    = false;
 let streamFinishedSuccessfully = false;
 let messageCount   = 0;
-let firstLoader    = null;
 
+// ── User-only holat ──────────────────────────
+// (part_index backendda saqlanadi, frontend bilmaydi)
+
+// ════════════════════════════════════════════
+//  PUBLIC: Mavzuni boshlash
+// ════════════════════════════════════════════
 async function startTopic() {
   _resetTopicState();
+  IS_GUEST ? await _startGuest() : await startUser();
+}
+
+// ════════════════════════════════════════════
+//  GUEST REJIMI
+// ════════════════════════════════════════════
+async function _startGuest() {
   firstLoader = showLoader(chat);
-
   try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    const urlParams = new URLSearchParams(window.location.search);
-
-    lesson_content = await fetchWithStreaming(
+    const { content } = await fetchWithStreaming(
       'generate-topic',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'text/event-stream',
-        },
-        body: JSON.stringify({
-          course_id: urlParams.get('course_id'),
-          topic_id: urlParams.get('topic_id'),
-          level_id: urlParams.get('level_id')
-        }),
-      },
-      _handleTopicChunk
+      _buildRequest(),
+      _onGuestChunk
     );
-
-    _finishTopicStream();
+    lesson_content = content;
+    _finishGuestStream();
   } catch (error) {
     hideLoader(firstLoader);
     addBotMessage('❌ ' + error.message);
   }
 }
 
-function _handleTopicChunk(chunk) {
-  isStreaming = true;
+function _onGuestChunk(chunk) {
+  isStreaming    = true;
   currentBuffer += chunk;
 
   while (currentBuffer.includes('[NEXT]')) {
     const parts     = currentBuffer.split('[NEXT]');
     const completed = parts.shift();
-    if (completed) _addToQueue(completed);
+    if (completed) _guestEnqueue(completed);
     currentBuffer = parts.join('[NEXT]');
   }
 }
 
-function _addToQueue(text) {
+function _guestEnqueue(text) {
   if (!text.trim()) return;
   messageQueue.push(text.trim());
-  if (messageCount === 0 && !isTyping) showNextMessage();
+  if (messageCount === 0 && !isTyping) _showNextGuestMessage();
 }
 
-function _finishTopicStream() {
+function _finishGuestStream() {
   isStreaming = false;
   streamFinishedSuccessfully = true;
   if (currentBuffer.trim()) {
-    _addToQueue(currentBuffer);
+    _guestEnqueue(currentBuffer);
     currentBuffer = '';
   }
 }
 
-function showNextMessage() {
+function _showNextGuestMessage() {
   if (messageQueue.length === 0 || isTyping) return;
 
   isTyping = true;
   const text = messageQueue.shift();
 
-  if (firstLoader) {
-    hideLoader(firstLoader);
-    firstLoader = null;
-  }
-
-  if (messageCount !== 0) addUserMessage('Davom etish');
+  if (firstLoader) { hideLoader(firstLoader); firstLoader = null; }
 
   const container = createBotMessageContainer();
   container.classList.add('bot');
@@ -92,31 +91,12 @@ function showNextMessage() {
   typeText(container, marked.parse(text), () => {
     messageCount++;
     const isLast = messageQueue.length === 0 && !isStreaming;
-
-    if (isLast) {
-      // FlowManager keyingi tugmani o'zi ko'rsatadi
-      FlowManager.stepDone('topic');
-    } else {
-      _showContinueButton();
-    }
+    isLast ? FlowManager.stepDone('topic') : _showLocalContinueButton();
   });
 }
 
-function _showContinueButton() {
-  const div = createBotMessageContainer();
-  div.classList.add('bot');
-  typeText(div, "Pastdagi 👇 tugmani bosib mavzuni davom ettirishingiz mumkin");
-  createButton('Davom etish ➡', 'continue-topic');
-}
-
-function handleContinue(event) {
-  event.target.closest('.center-btn').remove();
-
-  if (messageQueue.length > 0) {
-    showNextMessage();
-    return;
-  }
-
+// ── Guest: navbat bo'sh, stream hali kelayapti ─
+function _waitForGuestQueue() {
   const waitDiv = createBotMessageContainer();
   waitDiv.classList.add('bot');
   waitDiv.innerHTML = '<span>⏳ Yuklanmoqda...</span>';
@@ -126,7 +106,7 @@ function handleContinue(event) {
     if (messageQueue.length > 0) {
       clearInterval(check);
       waitDiv.remove();
-      showNextMessage();
+      _showNextGuestMessage();
     } else if (!isStreaming) {
       clearInterval(check);
       if (streamFinishedSuccessfully) waitDiv.remove();
@@ -135,6 +115,79 @@ function handleContinue(event) {
   }, 100);
 }
 
+// ════════════════════════════════════════════
+//  USER REJIMI
+// ════════════════════════════════════════════
+async function startUser() {
+  const messageDiv = createBotMessageContainer();
+  const loader = showLoader(chat);
+
+  try {
+    const topicRenderer = makeStreamingRenderer(messageDiv, loader);
+    const { content, hasMore } = await fetchWithStreaming(
+      'generate-topic',
+      _buildRequest(),
+      topicRenderer.onChunk
+    );
+    lesson_content += content;
+    topicRenderer.flush(() => {
+      hasMore ? _showLocalContinueButton() : FlowManager.stepDone('topic');
+    });
+  } catch (error) {
+    hideLoader(loader);
+    addBotMessage('❌ ' + error.message);
+  }
+}
+
+async function _fetchUserPart() {
+  const messageDiv = createBotMessageContainer();
+  const loader = showLoader(chat);
+
+  try {
+    const topicRenderer = makeStreamingRenderer(messageDiv, loader);
+    const { content, hasMore } = await fetchWithStreaming(
+      'continue-topic',
+      _buildRequest(),
+      topicRenderer.onChunk
+    );
+    lesson_content += content;
+    topicRenderer.flush(() => {
+      hasMore ? _showLocalContinueButton() : FlowManager.stepDone('topic');
+    });
+  } catch (error) {
+    hideLoader(loader);
+    addBotMessage('❌ ' + error.message);
+  }
+}
+
+// ════════════════════════════════════════════
+//  SHARED: "Davom etish" tugmasi va bosilishi
+// ════════════════════════════════════════════
+
+// Qismlar orasidagi mahalliy "Davom etish" (FlowManager tugmasi emas)
+function _showLocalContinueButton() {
+  const div = createBotMessageContainer();
+  div.classList.add('bot');
+  typeText(div, "Pastdagi 👇 tugmani bosib mavzuni davom ettirishingiz mumkin");
+  createButton('Davom etish ➡', 'continue-topic');
+}
+
+// app.js tomonidan chaqiriladi
+function handleContinue(event) {
+  event.target.closest('.center-btn').remove();
+  addUserMessage('Davom etish');
+
+  if (IS_GUEST) {
+    if (messageQueue.length > 0) _showNextGuestMessage();
+    else _waitForGuestQueue();
+  } else {
+    _fetchUserPart();
+  }
+}
+
+// ════════════════════════════════════════════
+//  Typing effekt (topic + quiz uchun umumiy)
+// ════════════════════════════════════════════
 function typeText(container, html, callback) {
   if (!html) {
     container.innerHTML = '<span>❌ Xatolik yuz berdi!</span>';
@@ -150,24 +203,7 @@ function typeText(container, html, callback) {
 
     if (index > html.length) {
       clearInterval(interval);
-
-      // SVG kodlarini rasmga aylantirish
-      // const svgElements = container.querySelectorAll('pre, code'); // AI ko'pincha kod blokiga o'raydi
-      // svgElements.forEach(el => {
-      //     const content = el.textContent.trim();
-      //     if (content.startsWith('<svg') && content.endsWith('</svg>')) {
-      //         const wrapper = document.createElement('div');
-      //         wrapper.className = 'svg-diagram-container';
-      //         wrapper.style.textAlign = 'center';
-      //         wrapper.style.margin = '20px 0';
-      //         wrapper.innerHTML = content; // Mana shu joyda matn haqiqiy SVG rasmga aylanadi
-      //         el.parentNode.replaceChild(wrapper, el);
-      //     }
-      // });
-      // activateInteractiveSection();
-     
       applyHighlighting(container);
-
       chatInput.style.display = 'flex';
       isTyping = false;
       callback?.();
@@ -175,24 +211,36 @@ function typeText(container, html, callback) {
   }, 2);
 }
 
+// ════════════════════════════════════════════
+//  Yordamchilar
+// ════════════════════════════════════════════
+function _buildRequest(extra = {}) {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  const urlParams = new URLSearchParams(window.location.search);
+  return {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+      'X-Requested-With': 'XMLHttpRequest',
+      'Accept': 'text/event-stream',
+    },
+    body: JSON.stringify({
+      course_id: urlParams.get('course_id'),
+      topic_id: urlParams.get('topic_id'),
+      level_id: urlParams.get('level_id')
+    }),
+  };
+}
+
 function _resetTopicState() {
-  lesson_content  = '';
-  messageQueue    = [];
-  currentBuffer   = '';
-  isTyping        = false;
-  isStreaming     = false;
+  // lesson_content saqlanadi — resume uchun kerak
+  messageQueue   = [];
+  currentBuffer  = '';
+  isTyping       = false;
+  isStreaming    = false;
   streamFinishedSuccessfully = false;
-  messageCount    = 0;
-  firstLoader     = null;
+  messageCount   = 0;
+  firstLoader    = null;
+  // currentPartIndex saqlanadi — user rejimida resume uchun
 }
-
-
-function restoreText(text, message_sender) {
-  content = marked.parse(text);
-  message_sender(content);
-}
-
-// restoreText(`Assalomu alaykum aziz o'quvchi! Bugungi bizning birinchi darsimiz "Kirish: Algoritm tushunchasi"`, addBotMessage);
-
-// flowName = document.querySelector('meta[name="topic-flow"]')?.getAttribute('content') || 'default';
-// FlowManager.init(flowName, 1);

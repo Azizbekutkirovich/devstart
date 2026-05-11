@@ -21,17 +21,17 @@ const FLOWS = {
     { id: 'topic',    label: 'Darsni boshlash',              action: 'startTopic',    removeBtn: true  },
     { id: 'quiz',     label: 'Quiz testlar',           action: 'startTest',     removeBtn: true  },
     { id: 'practice', label: 'Amaliy topshiriqlar', action: 'startPractice', removeBtn: true  },
-    { id: 'end',      label: "Keyingi mavzuga o'tish ➡️",    action: 'nextTopic',     removeBtn: false },
+    { id: 'end',      label: "Keyingi darsga o'tish ➡️",    action: 'nextTopic',     removeBtn: false },
   ],
 
   theory: [
     { id: 'topic', label: 'Darsni boshlash',           action: 'startTopic', removeBtn: true },
-    { id: 'end',   label: "Keyingi mavzuga o'tish ➡️", action: 'nextTopic',  removeBtn: false },
+    { id: 'end',   label: "Keyingi darsga o'tish ➡️", action: 'nextTopic',  removeBtn: false },
   ],
 
   setup: [
     { id: 'topic', label: 'Darsni boshlash',           action: 'startTopic', removeBtn: true },
-    { id: 'end',   label: "Keyingi mavzuga o'tish ➡️", action: 'nextTopic',  removeBtn: false },
+    { id: 'end',   label: "Keyingi darsga o'tish ➡️", action: 'nextTopic',  removeBtn: false },
   ],
 };
 
@@ -92,7 +92,7 @@ const FlowManager = (() => {
     const prompts = {
       quiz:     "Pastdagi 👇 tugmani bossangiz <strong>Mavzuga oid testlar</strong> taqdim etiladi",
       practice: "Pastdagi 👇 tugmani bossangiz <strong>Amaliy topshiriqlar</strong> taqdim etiladi",
-      end:      "Tabriklaymiz 🎉🎉🎉. Siz mavzuni to'liq tugatdingiz. Pastdagi 👇 tugmani bosib keyingi mavzuga o'tishingiz mumkin",
+      end:      "Tabriklaymiz 🎉🎉🎉. Siz darsni to'liq tugatdingiz. Pastdagi 👇 tugmani bosib keyingi darsga o'tishingiz mumkin",
     };
 
     const text = prompts[step.id];

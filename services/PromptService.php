@@ -105,7 +105,6 @@ O'xshash tushunchalar bilan farqi va mavzuning 'oltin qoida'si.
 
 5. MENTAL XULOSA
 O'quvchi o'ziga berishi kerak bo'lgan 3 ta savol va javob.
-[NEXT]
 
 MUHIM: Kirish va salomlashishsiz darsni boshla. Har bo'limdan keyin yangi qatorda [NEXT] belgisini qo'y. Sarlavhalar H2da bo'lsin.",
 				"setup" => "Sen tajribali Professional AI DevOps va Tizim muhandisisan. Sening vazifang foydalanuvchiga dasturlash muhitini, kutubxonalarni yoki dasturiy vositalarni xatosiz o'rnatish (setup) bo'yicha yo'riqnoma tayyorlash.

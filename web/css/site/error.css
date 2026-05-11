@@ -1,0 +1,72 @@
+/* Error sahifasi uchun maxsus minimal stillar */
+.error-wrapper {
+    min-height: calc(100vh - 140px); /* Nav va footer orasidagi masofa */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.error-content {
+    text-align: center;
+    max-width: 500px;
+    animation: fadeUp 0.8s ease-out;
+}
+
+.error-code {
+    font-family: 'Space Mono', monospace;
+    font-size: 8rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+    text-shadow: 0 0 30px var(--glow);
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.error-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+}
+
+.error-desc {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 32px;
+    font-weight: 300;
+}
+
+.error-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.btn-secondary {
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    background: var(--surface2);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    background: rgba(0, 229, 255, 0.05);
+}
+
+@media (max-width: 480px) {
+    .error-code { font-size: 5rem; }
+    .error-title { font-size: 1.4rem; }
+    .error-actions { flex-direction: column; }
+}

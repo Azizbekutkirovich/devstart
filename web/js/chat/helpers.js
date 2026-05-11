@@ -2,10 +2,9 @@
 //  helpers.js — Umumiy yordamchi funksiyalar
 // ═══════════════════════════════════════════
 
-const chat = document.getElementById('chat');
-const chatInput = document.getElementById('chatInput');
-const askQuestionBtn = document.getElementById('askQuestionBtn');
-const userInput = document.getElementById('userInput');
+const chat        = document.getElementById('chat');
+const chatInput   = document.getElementById('chatInput');
+const userInput   = document.getElementById('userInput');
 
 // ── Auto-grow textarea ──────────────────────
 document.addEventListener('input', function (e) {
@@ -33,13 +32,13 @@ function addBotMessage(html) {
   div.className = 'message bot';
   div.innerHTML = html;
   chat.appendChild(div);
+  scrollToBottom();
 }
 
 function createBotMessageContainer() {
   const div = document.createElement('div');
   div.className = 'message';
   chat.appendChild(div);
-  // scrollToBottom();
   return div;
 }
 
@@ -58,13 +57,13 @@ function showLoader(container) {
   const div = document.createElement('div');
   div.className = 'loader-wrapper';
   div.innerHTML = `
-  <div class="loader-container">
-    <div class="robot-wrapper">
-      <img src="${botAvatar}" alt="Robot" class="loader-img">
-      <div class="pulse-ring"></div>
+    <div class="loader-container">
+      <div class="robot-wrapper">
+        <img src="${botAvatar}" alt="Robot" class="loader-img">
+        <div class="pulse-ring"></div>
+      </div>
+      <div class="loader-text">AI o'ylayapti<span class="dots">...</span></div>
     </div>
-    <div class="loader-text">AI o'ylayapti<span class="dots">...</span></div>
-  </div>
   `;
   container.appendChild(div);
   return div;
@@ -88,51 +87,39 @@ function applyHighlighting(container) {
 // ── Copy tugmalari ──────────────────────────
 function addCopyButtons(root = document) {
   root.querySelectorAll('pre:not(.copy-added)').forEach((pre) => {
-    if (pre.closest('.interactive-section')) {
-      return; 
-    }
-
     pre.classList.add('copy-added');
     pre.style.position = 'relative';
-
     const btn = document.createElement('button');
     btn.className = 'copy-code-button';
-    btn.textContent = 'Copy';
+    btn.textContent = 'Nusxalash';
     pre.appendChild(btn);
-
     btn.addEventListener('click', async () => {
       const code = pre.querySelector('code')?.innerText || '';
       await navigator.clipboard.writeText(code);
-      btn.textContent = 'Copied!';
+      btn.textContent = 'Nusxalandi!';
       btn.classList.add('copied');
-      setTimeout(() => {
-        btn.textContent = 'Copy';
-        btn.classList.remove('copied');
-      }, 1500);
+      setTimeout(() => { btn.textContent = 'Nusxalash'; btn.classList.remove('copied'); }, 1500);
     });
   });
 }
 
-// Yangi qo'shilgan elementlarga avtomatik copy tugma
-// const copyObserver = new MutationObserver((mutations) => {
-//   for (const mutation of mutations) {
-//     for (const node of mutation.addedNodes) {
-//       if (node.nodeType === 1) {
-//         if (node.closest('.interactive-section')) continue;
-//         addCopyButtons(node);
-//       }
-//     }
-//   }
-// });
-
-// copyObserver.observe(document.body, { childList: true, subtree: true });
+const copyObserver = new MutationObserver((mutations) => {
+  for (const mutation of mutations)
+    for (const node of mutation.addedNodes)
+      if (node.nodeType === 1) addCopyButtons(node);
+});
+copyObserver.observe(document.body, { childList: true, subtree: true });
 
 // ── SSE Streaming ───────────────────────────
 /**
- * @param {string} url
- * @param {RequestInit} options
- * @param {(chunk: string, full: string) => void} onChunk
- * @returns {Promise<string>} to'liq kontent
+ * SSE stream o'qib, har chunk da onChunk chaqiradi.
+ *
+ * Terminator signallari:
+ *   [DONE]      — guest rejimi, kontent tugadi
+ *   [DONE:more] — user rejimi, yana qism bor
+ *   [DONE:end]  — user rejimi, mavzu tugadi
+ *
+ * @returns {Promise<{ content: string, hasMore: boolean }>}
  */
 async function fetchWithStreaming(url, options, onChunk) {
   const response = await fetch(url, options);
@@ -141,9 +128,9 @@ async function fetchWithStreaming(url, options, onChunk) {
     throw new Error("Serverda xatolik yuz berdi. Iltimos keyinroq urinib ko'ring!");
   }
 
-  const reader = response.body.getReader();
+  const reader  = response.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = '';
+  let buffer      = '';
   let fullContent = '';
 
   while (true) {
@@ -152,14 +139,14 @@ async function fetchWithStreaming(url, options, onChunk) {
 
     buffer += decoder.decode(value, { stream: true });
     const regex = /data: (.*?)\n/g;
-    let match;
-    let lastIndex = 0;
+    let match, lastIndex = 0;
 
     while ((match = regex.exec(buffer)) !== null) {
       const rawData = match[1].trim();
       lastIndex = regex.lastIndex;
 
-      if (rawData === '[DONE]') return fullContent;
+      if (rawData === '[DONE:more]') return { content: fullContent, hasMore: true  };
+      if (rawData === '[DONE:end]' || rawData === '[DONE]') return { content: fullContent, hasMore: false };
 
       try {
         const json = JSON.parse(rawData);
@@ -174,76 +161,91 @@ async function fetchWithStreaming(url, options, onChunk) {
     }
     buffer = buffer.substring(lastIndex);
   }
-  return fullContent;
+  return { content: fullContent, hasMore: false };
 }
 
-// ── Streaming rendering yordamchisi ─────────
+// ── Standart streaming renderer (typing effekt) ─
 /**
- * fetchWithStreaming uchun standart onChunk handler.
- * Loader yashiradi va messageDiv ni render qiladi.
+ * Loader yashiradi va typeText kabi belma-bel chiqaradi.
+ *
+ * Ishlash tamoyili:
+ *   - Kelgan chunklar "pendingContent" buferiga yig'iladi
+ *   - Interval "typedIndex" ni bittadan oshirib buferdan o'qiydi
+ *   - Stream tezligi va typing tezligi bir-biridan mustaqil
+ *
+ * @returns {{ onChunk, flush }}
+ *   onChunk — fetchWithStreaming ga beriladi
+ *   flush   — stream tugagach callback bilan chaqiriladi
  */
 function makeStreamingRenderer(messageDiv, loader) {
-  let isFirstChunk = true;
-  return function onChunk(_newChunk, allContent) {
+  let pendingContent = '';
+  let typedIndex     = 0;
+  let intervalId     = null;
+  let isFirstChunk   = true;
+  let onDone         = null;
+
+  function _tick() {
+    if (typedIndex >= pendingContent.length) return; // chunk hali kelmagan — kutamiz
+
+    typedIndex++;
+    messageDiv.innerHTML = `<span><img src="${botAvatar}" alt="Robot" style="width: 70px; height: auto; z-index: 2;">
+     ${marked.parse(pendingContent.substring(0, typedIndex))}</span>`;
+
+    if (typedIndex >= pendingContent.length && onDone) _finish();
+  }
+
+  function _finish() {
+    clearInterval(intervalId);
+    applyHighlighting(messageDiv);
+    onDone?.();
+    onDone = null;
+  }
+
+  function onChunk(_newChunk, allContent) {
     if (isFirstChunk) {
       hideLoader(loader);
       messageDiv.classList.add('bot');
+      intervalId   = setInterval(_tick, 2);
       isFirstChunk = false;
     }
-    messageDiv.innerHTML = `
-      <span>
-        <img src="${botAvatar}" alt="Robot" style="width: 70px; height: auto; z-index: 2;">
-        ${marked.parse(allContent)}
-      </span>
-    `;
-    applyHighlighting(messageDiv);
-  };
+    pendingContent = allContent; // interval o'zi davom ettiradi
+  }
+
+  /**
+   * Stream tugagach chaqiriladi.
+   * Typing hali davom etayotgan bo'lsa — tugagach callback ishga tushadi.
+   */
+  function flush(callback) {
+    onDone = callback || null;
+    if (typedIndex >= pendingContent.length) _finish();
+  }
+
+  return { onChunk, flush };
 }
 
-function activateInteractiveSection() {
-    const container = document.querySelector('.interactive-section');
-    if (!container) return;
+function nextTopic() {
+  // 1. Joriy URL'ni olish
+  const currentUrl = new URL(window.location.href);
 
-    // 1. Observerni vaqtincha to'xtatamiz
-    // copyObserver.disconnect();
+  // 2. URL'dagi parametrlarni olish (masalan: ?topic_id=5)
+  const searchParams = currentUrl.searchParams;
+  let topicId = searchParams.get('topic_id');
 
-    const scripts = container.querySelectorAll('script');
-    scripts.forEach(oldScript => {
-        const newScript = document.createElement('script');
-        newScript.textContent = oldScript.textContent;
-        
-        // Bu amal observerni qo'zg'atmaydi, chunki u disconnect qilingan
-        document.body.appendChild(newScript);
-        document.body.removeChild(newScript);
-    });
+  if (topicId) {
+      // 3. topic_id ni songa o'tkazish va 1 qo'shish
+      let nextTopicId = parseInt(topicId) + 1;
 
-    // 2. Ikonkalarni chizish
-    if (window.lucide) {
-        window.lucide.createIcons({ src: container });
-    }
+      // 4. Yangi qiymatni parametrlarga o'rnatish
+      searchParams.set('topic_id', nextTopicId);
 
-    // 3. Observerni qayta ishga tushiramiz
-    // 'chat' divini yoki asosiy konteynerni kuzatishni davom ettiradi
-    // copyObserver.observe(document.getElementById('chat'), {
-    //     childList: true,
-    //     subtree: true
-    // });
+      // 5. Yangi shakllangan URL ga yo'naltirish
+      window.location.href = currentUrl.pathname + '?' + searchParams.toString();
+  } else {
+      console.error("URL'da topic_id topilmadi.");
+  }
 }
 
-function applyHighlighting(container) {
-    // Interaktiv section ichida bo'lmagan 'pre code'larni topamiz
-    const codeBlocks = container.querySelectorAll('pre code');
-    
-    codeBlocks.forEach(code => {
-        // Agar kod bloki .interactive-section ichida bo'lsa, uni o'tkazib yuboramiz
-        if (code.closest('.interactive-section')) return;
-
-        // Faqat oddiy kod bloklarini highlight qilamiz
-        hljs.highlightElement(code);
-    });
-}
-
-// ── Marked konfiguratsiyasi ──────────────────
+// ── Marked & hljs init ───────────────────────
 marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
-// hljs.highlightAll();
-// addCopyButtons();
+hljs.highlightAll();
+addCopyButtons();

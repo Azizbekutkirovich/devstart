@@ -23,6 +23,7 @@ $this->registerCssFile(Url::base()."/css/dashboard/my-courses.css");
 
   other_courses = [
     [
+      "user_data_id"
       "name"
       "progress"
       "course_level" => [
@@ -84,7 +85,7 @@ $this->registerCssFile(Url::base()."/css/dashboard/my-courses.css");
     <div class="section-label">Siz tanlagan boshqa kurslar</div>
     <?php if (!empty($other_courses)): ?>
     <?php foreach ($other_courses as $course): ?>
-    <div class="course-hero">
+    <div class="course-hero" onclick="changeCourse(<?=$course['user_data_id']?>)">
       <div class="course-hero-bg"></div>
       <div class="course-hero-grid"></div>
       <div class="course-hero-overlay"></div>
@@ -92,8 +93,8 @@ $this->registerCssFile(Url::base()."/css/dashboard/my-courses.css");
       <div class="course-hero-content">
         <div class="course-tags-wrapper">
           <div class="course-tag level-tag">
-             <img src="<?=Url::base()?>/images/icons/<?=$active_level['img']?>" alt="level">
-             <?=$active_level['title']?>
+             <img src="<?=Url::base()?>/images/icons/<?=$course['course_level']['img']?>" alt="level">
+             <?=$course['course_level']['title']?>
           </div>
         </div>
         <div class="course-title-block">
@@ -128,6 +129,9 @@ $this->registerCssFile(Url::base()."/css/dashboard/my-courses.css");
   </div><br><br>
   <a href="<?=Url::to(['site/courses'])?>" class="btn btn-primary" style='text-decoration: none;'>➕ Yangi kursni boshlash</a>
 </main>
+<script type="text/javascript">
+  let change_course_url = '<?=Url::to(['auth/change-course'])?>';
+</script>
 <?php
   $this->registerJsFile(Url::base()."/js/dashboard/my-courses.js");
 ?>

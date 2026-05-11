@@ -7,6 +7,7 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use app\models\Levels;
 use app\models\Courses;
+use app\models\UserData;
 use app\models\RegisterForm;
 use app\models\SelectedForm;
 use app\models\LoginForm;
@@ -20,32 +21,84 @@ class AuthController extends Controller
 		return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['login', 'register', 'google-callback', 'google-redirect'],
+                'only' => ['login', 'logout', 'register', 'google-callback', 'google-redirect', 'add-course', 'change-course'],
                 'rules' => [
+                    [
+                        'actions' => ['add-course', 'change-course', 'logout'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
                     [
                         'actions' => ['login', 'register', 'google-callback', 'google-redirect'],
                         'allow' => true,
                         'roles' => ['?'],
-                    ],
+                    ]
                 ],
             ]
         ];
 	}
 
-    public function actionTest() {
+    public function actionLogout() {
         Yii::$app->user->logout();
         return $this->goBack();
     }
 
+    public function actionAddCourse(int $course_id, int $level_id) {
+        $selected_model = new SelectedForm();
+        $selected_model->course_id = $course_id;
+        $selected_model->level_id = $level_id;
+        if (!$selected_model->validate()) {
+            return $this->goBack();
+        }
+        $user_data = UserData::create(Yii::$app->user->identity->id, $course_id, $level_id);
+        if (!$user_data['success']) {
+            return $this->goBack();
+        }
+
+        $user = Yii::$app->user->identity;
+        $user->last_active_user_data_id = $user_data['id'];
+        if ($user->save()) {
+            return $this->redirect(['dashboard/home']);
+        } else {
+            Yii::error("User course qo'shganda xatolik: ".$user->getErrors());
+            return $this->redirect(['dashboard/my-courses']);
+        }
+    }
+
+    public function actionChangeCourse($user_data_id)
+    {
+        $user = Yii::$app->user->identity;
+        
+        $userData = UserData::findOne(['id' => $user_data_id, 'user_id' => $user->id]);
+        
+        if ($userData) {
+            $user->last_active_user_data_id = $user_data_id;
+            if ($user->save(false)) {
+                return $this->redirect(['dashboard/home']);
+            }
+        }
+        
+        return $this->goBack();
+    }
+
 	public function actionStart(int $course_id) {
-        $model = new RegisterForm();
-		$levels = Levels::getAll();
         $course_name = Courses::find()->select(['name'])->where(['id' => $course_id])->asArray()->one()['name'];
-        return $this->render("start", [
-            "model" => $model,
-            "levels" => $levels,
-            "course_name" => $course_name
-        ]);
+        $levels = Levels::getAll();
+
+        if (!Yii::$app->user->isGuest) {
+            return $this->render('start-user', [
+                "levels" => $levels,
+                "course_name" => $course_name,
+                "fullname" => Yii::$app->user->identity->fullname
+            ]);
+        } else {
+            $model = new RegisterForm();
+            return $this->render("start", [
+                "model" => $model,
+                "levels" => $levels,
+                "course_name" => $course_name
+            ]);
+        }
 	}
 
     public function actionLogin() {

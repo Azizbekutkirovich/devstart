@@ -3,44 +3,33 @@
 // ═══════════════════════════════════════════
 // Bog'liqlik: helpers.js, flowManager.js
 
-let practices = '';
+// Resume bo'lsa practices tiklanadi
+let practices = window.__RESUME__?.practices || '';
 
+// ── Amaliy topshiriqlarni yuklash ─────────────
 async function startPractice() {
   const messageDiv = createBotMessageContainer();
   const loader     = showLoader(chat);
 
   try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    const urlParams = new URLSearchParams(window.location.search);
-
-    practices = await fetchWithStreaming(
+    const practiceRenderer = makeStreamingRenderer(messageDiv, loader);
+    const { content } = await fetchWithStreaming(
       'generate-practice',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'text/event-stream',
-        },
-        body: JSON.stringify({
-          course_id: urlParams.get('course_id'),
-          topic_id: urlParams.get('topic_id'),
-          level_id: urlParams.get('level_id'),
-          lesson_content,
-        }),
-      },
-      makeStreamingRenderer(messageDiv, loader)
+      _buildPracticeRequest(),
+      practiceRenderer.onChunk
     );
-
-    _appendPracticeInputs();
-    createButton('Topshiriqlarni yuborish', 'validateTask');
+    practices = content;
+    practiceRenderer.flush(() => {
+      appendPracticeInputs();
+      createButton('Topshiriqlarni yuborish', 'validateTask');
+    });
   } catch (error) {
     hideLoader(loader);
     addBotMessage('❌ ' + error.message);
   }
 }
 
+// ── Javoblarni tekshirish ─────────────────────
 async function checkPracticeTask() {
   const answers = [];
   let i = 1;
@@ -56,41 +45,22 @@ async function checkPracticeTask() {
   const loader     = showLoader(chat);
 
   try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    const urlParams = new URLSearchParams(window.location.search);
-
+    const checkRenderer = makeStreamingRenderer(messageDiv, loader);
     await fetchWithStreaming(
       'check-practice',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'text/event-stream',
-        },
-        body: JSON.stringify({
-          course_id: urlParams.get('course_id'),
-          topic_id: urlParams.get('topic_id'),
-          level_id: urlParams.get('level_id'),
-          practices,
-          answers,
-        }),
-      },
-      makeStreamingRenderer(messageDiv, loader)
+      _buildPracticeRequest({ answers }),
+      checkRenderer.onChunk
     );
-
-    // FlowManager "end" stepini ko'rsatadi
-    FlowManager.stepDone('practice');
+    checkRenderer.flush(() => FlowManager.stepDone('practice'));
   } catch (error) {
     hideLoader(loader);
     addBotMessage('❌ ' + error.message);
   }
 }
 
-function _appendPracticeInputs() {
+// ── Javob input-larini yaratish ───────────────
+function appendPracticeInputs() {
   document.getElementById('practice-inputs')?.remove();
-
   const container = document.createElement('div');
   container.id = 'practice-inputs';
 
@@ -100,6 +70,36 @@ function _appendPracticeInputs() {
     inputDiv.innerHTML = `<textarea placeholder="${i}-topshiriq javobini shu yerga yozing..."></textarea>`;
     container.appendChild(inputDiv);
   }
-
   chat.appendChild(container);
+}
+
+// ── So'rov yig'uvchi ──────────────────────────
+function _buildPracticeRequest(extra = {}) {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  const urlParams = new URLSearchParams(window.location.search);
+  return {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+      'X-Requested-With': 'XMLHttpRequest',
+      'Accept': 'text/event-stream',
+    },
+    body: JSON.stringify({
+      course_id: urlParams.get('course_id'),
+      topic_id: urlParams.get('topic_id'),
+      level_id: urlParams.get('level_id'),
+      lesson_content,
+      practices,
+      ...extra,
+    }),
+  };
+}
+
+// ── Restore uchun public funksiya ─────────────
+// restorer.js tomonidan chaqiriladi:
+// practice content bor lekin javob yuborilmagan holat
+function restorePracticeInputs() {
+  appendPracticeInputs();
+  createButton('Topshiriqlarni yuborish', 'validateTask');
 }

@@ -29,6 +29,9 @@ class Messages extends \yii\db\ActiveRecord
     const TYPE_TEXT = 'text';
     const TYPE_QUIZ = 'quiz';
     const TYPE_COMMAND = 'command';
+    const TYPE_PRACTICE = 'practice';
+    const TYPE_TOPIC = 'topic';
+    const TYPE_PRACTICE_RESULT = 'practice_result';
     const TYPE = '';
 
     /**
@@ -106,6 +109,9 @@ class Messages extends \yii\db\ActiveRecord
             self::TYPE_TEXT => 'text',
             self::TYPE_QUIZ => 'quiz',
             self::TYPE_COMMAND => 'command',
+            self::TYPE_PRACTICE => 'practice',
+            self::TYPE_TOPIC => 'topic',
+            self::TYPE_PRACTICE_RESULT => 'practice_result',
             self::TYPE => '',
         ];
     }
@@ -230,13 +236,14 @@ class Messages extends \yii\db\ActiveRecord
         $this->type = self::TYPE;
     }
 
-    public static function create($chat_id, $sender_role, $type, $content)
+    public static function create($chat_id, $sender_role, $type, $content, $step_topic_index = null)
     {
         $model = new self();
         $model->chat_id = $chat_id;
         $model->sender_role = $sender_role;
         $model->type = $type;
         $model->content = $content;
+        $model->step_topic_index = $step_topic_index;
 
         if ($model->save()) {
             return true;

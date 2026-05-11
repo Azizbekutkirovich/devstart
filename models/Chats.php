@@ -85,16 +85,25 @@ class Chats extends \yii\db\ActiveRecord
         return $this->hasOne(UserData::class, ['id' => 'user_data_id']);
     }
 
-    public static function create(int $topic_id, int $current_stage) {
+    public static function create(int $topic_id, int $current_stage, array $needed_data) {
         $chats = new self();
         $chats->user_data_id = Yii::$app->user->identity->last_active_user_data_id;
         $chats->topic_id = $topic_id;
         $chats->current_stage = $current_stage;
+        $chats->total_stages = 0;
         if ($chats->save()) {
-            return [
+            $return_data =  [
                 "success" => true,
-                "id" => $chats->id
+                "data" => []
             ];
+
+            foreach ($needed_data as $n) {
+                if (isset($chats->$n)) {
+                    $return_data['data'][$n] = $chats->$n;
+                }
+            }
+
+            return $return_data;
         } else {
             Yii::error([
                 "message" => "Chat hosil qilishda xatolik",

@@ -10,6 +10,7 @@ use app\models\Courses;
 use app\models\Topics;
 use app\models\Levels;
 use app\models\Chats;
+use app\models\MasterLessons;
 use app\models\Messages;
 use app\services\GeminiApiService;
 use app\services\PromptService;
@@ -56,7 +57,7 @@ class ChatController extends Controller
         $body  = Yii::$app->request->getBodyParams();
         $course = $this->resolveCourse();
         $topic = $this->resolveTopic((int) ($body['topic_id'] ?? 0), $course['id']);
-        $level = $this->resolveLevel();                          // user→session | guest→body
+        $level = $this->resolveLevel();
 
         $mentor = $course['mentor'];
 
@@ -73,7 +74,7 @@ class ChatController extends Controller
         if (Yii::$app->user->isGuest) {
             $this->handleGuestGenerateTopic($prompt);
         } else {
-            $this->handleUserGenerateTopic($prompt, $topic, $level);
+            $this->handleUserGenerateTopic($prompt, $topic);
         }
     }
 
@@ -82,9 +83,9 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body           = Yii::$app->request->getBodyParams();
-        $course = $this->resolveCourse((int) ($body['course_id'] ?? 0));
-        $topic          = $this->resolveTopic((int) ($body['topic_id'] ?? 0), (int) ($body['course_id'] ?? 0));
-        $level          = $this->resolveLevel();
+        $course = $this->resolveCourse();
+        $topic = $this->resolveTopic((int) ($body['topic_id'] ?? 0), $course['id']);
+        $level = $this->resolveLevel();
         $lesson_content = $this->requireField($body, 'lesson_content');
 
         $prompt = $this->resolvePrompt('generate-practice', [
@@ -98,7 +99,7 @@ class ChatController extends Controller
         if (Yii::$app->user->isGuest) {
             $this->handleGuestGeneratePractice($prompt);
         } else {
-            $this->handleUserGeneratePractice($prompt, $topic, $level);
+            $this->handleUserGeneratePractice($prompt, $topic);
         }
     }
 
@@ -107,9 +108,9 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body          = Yii::$app->request->getBodyParams();
-        $course = $this->resolveCourse((int) ($body['course_id'] ?? 0));
-        $topic         = $this->resolveTopic((int) ($body['topic_id'] ?? 0), (int) ($body['course_id'] ?? 0));
-        $level         = $this->resolveLevel();
+        $course = $this->resolveCourse();
+        $topic = $this->resolveTopic((int) ($body['topic_id'] ?? 0), $course['id']);
+        $level = $this->resolveLevel();
         $user_question = $this->requireField($body, 'user_question');
 
         $prompt = $this->resolvePrompt('ask-question-about-topic', [
@@ -123,7 +124,7 @@ class ChatController extends Controller
         if (Yii::$app->user->isGuest) {
             $this->handleGuestAskQuestion($prompt);
         } else {
-            $this->handleUserAskQuestion($prompt, $topic, $level, $user_question);
+            $this->handleUserAskQuestion($prompt, $topic, $user_question);
         }
     }
 
@@ -132,9 +133,9 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body         = Yii::$app->request->getBodyParams();
-        $course = $this->resolveCourse((int) ($body['course_id'] ?? 0));
-        $topic        = $this->resolveTopic((int) ($body['topic_id'] ?? 0), (int) ($body['course_id'] ?? 0));
-        $level        = $this->resolveLevel();
+        $course = $this->resolveCourse();
+        $topic = $this->resolveTopic((int) ($body['topic_id'] ?? 0), $course['id']);
+        $level = $this->resolveLevel();
         $practices    = $this->requireField($body, 'practices');
         $user_answers = $body['answers'] ?? [];
 
@@ -153,7 +154,7 @@ class ChatController extends Controller
         if (Yii::$app->user->isGuest) {
             $this->handleGuestCheckPractice($prompt);
         } else {
-            $this->handleUserCheckPractice($prompt, $topic, $level);
+            $this->handleUserCheckPractice($prompt, $topic, $user_answers);
         }
     }
 
@@ -166,9 +167,9 @@ class ChatController extends Controller
         $this->requireAjax();
 
         $body           = Yii::$app->request->getBodyParams();
-        $course = $this->resolveCourse((int) ($body['course_id'] ?? 0));
-        $topic          = $this->resolveTopic((int) ($body['topic_id'] ?? 0), (int) ($body['course_id'] ?? 0), useJson: true);
-        $level          = $this->resolveLevel(useJson: true);
+        $course = $this->resolveCourse();
+        $topic = $this->resolveTopic((int) ($body['topic_id'] ?? 0), $course['id'], useJson: true);
+        $level = $this->resolveLevel(useJson: true);
         $lesson_content = $this->requireField($body, 'lesson_content', useJson: true);
 
 
@@ -183,7 +184,7 @@ class ChatController extends Controller
         if (Yii::$app->user->isGuest) {
             return $this->handleGuestGenerateQuizTest($prompt);
         } else {
-            return $this->handleUserGenerateQuizTest($prompt, $topic, $level);
+            return $this->handleUserGenerateQuizTest($prompt, $topic);
         }
     }
 
@@ -215,7 +216,8 @@ class ChatController extends Controller
     /**
      * Tizimga kirgan foydalanuvchilar uchun chat sahifasi.
      */
-    public function actionChat(int $topic_id) {
+    public function actionChat(int $topic_id) 
+    {
         $course = Courses::findOne(Yii::$app->user->identity->activeData['course_id']);
         $topic = Topics::find()
             ->alias('t')
@@ -228,12 +230,24 @@ class ChatController extends Controller
             ->with(['module'])
             ->asArray()
             ->one();
-        $chat_id = $this->resolveChat($topic_id);
+        $chat_data = $this->resolveChat($topic_id, ['current_stage']);
         $messages = Messages::find()
-            ->where(['chat_id' => $chat_id])
+            ->where(['chat_id' => $chat_data['id']])
             ->orderBy(['created_at' => SORT_ASC])
             ->asArray()
             ->all();
+
+        $topic_completed = false;
+        $full_content = "";
+        if (!empty($messages)) {
+            $msl_data = MasterLessons::find()->select(['total_parts', 'full_content'])->where(['chat_id' => $chat_data['id']])->asArray()->one();
+            if (!empty($msl_data)) {
+                if ($chat_data['current_stage'] >= $msl_data['total_parts']) {
+                    $topic_completed = true;
+                    $full_content = $msl_data['full_content'];
+                }
+            }
+        }
         // echo '<pre>';
         //     print_r($messages);
         // echo '</pre>';
@@ -246,8 +260,11 @@ class ChatController extends Controller
         return $this->render('chat', [
             'topic_type' => $topic['type'],
             'topic_name' => $topic['title'],
+            "current_stage" => $chat_data['current_stage'] ?? 0,
             'mentor_avatar' => $course->mentor->chat_img,
-            'messages' => $messages
+            'messages' => $messages,
+            'topic_completed' => $topic_completed,
+            'full_content' => $full_content
         ]);        
     }
 
@@ -379,30 +396,280 @@ class ChatController extends Controller
     // almashtirib chiqish kifoya.
     // =========================================================================
 
-    private function handleUserGenerateTopic(string $prompt, array $topic, array $level): void
+    private function handleUserGenerateTopic(string $prompt, array $topic): void
     {
-        $content = '';
+        // streamFirstPartOnly:
+        //   - frontga faqat 1-qism ([NEXT] gacha) uzatadi
+        //   - to'liq contentni qaytaradi
+        $fullContent = $this->streamFirstPartOnly($prompt);
 
-        $this->streamResponse($prompt, function (string $chunk) use (&$content) {
-            $content .= $chunk;
-        });
+        if ($fullContent === null) {
+            // streamFirstPartOnly ichida xato yuz berdi, javob allaqachon yuborilgan
+            return;
+        }
 
-        $chat_id = $this->resolveChat($topic['id']);
+        // ── Qismlarni ajratish ─────────────────────────────────────────────────
+        $parts      = explode('[NEXT]', $fullContent);  // [part0, part1, ...]
+        $totalParts = count($parts);                     // [NEXT] soni + 1
 
-        if (!$chat_id) exit();
+        // ── Chat topish / yaratish ─────────────────────────────────────────────
+        $chatId = $this->resolveChat($topic['id'])['id'];
+        if (!$chatId) exit();
 
+        // ── total_stages hisoblash, chats yangilash ────────────────────────────
+        $topicType   = $topic['type'] ?? 'theory';
+        $totalStages = $this->calculateTotalStages($topicType, $totalParts);
 
-        $lesson_content = [
-            "text" => $content
-        ];
+        // Tranzaksiyani boshlash
+        $transaction = Yii::$app->db->beginTransaction();
 
-        if (!Messages::create($chat_id, 'system', 'text', ["text" => "Darsni boshlash"]) || !Messages::create($chat_id, 'mentor', 'text', $lesson_content)) exit();
+        try {
+            // 1. Chats jadvalini yangilash
+            $updatedRows = Chats::updateAll(
+                [
+                    'total_stages'  => $totalStages,
+                    'current_stage' => new \yii\db\Expression('current_stage + 1'),
+                ],
+                ['id' => $chatId]
+            );
+
+            // 2. MasterLessons modelini saqlash
+            $masterLesson               = new MasterLessons();
+            $masterLesson->chat_id      = $chatId;
+            $masterLesson->full_content = $fullContent;
+            $masterLesson->total_parts  = $totalParts;
+
+            if (!$masterLesson->save()) {
+                throw new \Exception("MasterLesson_SAVE_ERROR");
+            }
+
+            // 3. Messages: system + 1-qism saqlash
+            $firstPartText = trim($parts[0]);
+
+            $systemMsg = Messages::create($chatId, 'system', 'text', ['text' => 'Darsni boshlash']);
+            $mentorMsg = Messages::create($chatId, 'mentor', 'topic', ['text' => $firstPartText], 0);
+
+            if (!$systemMsg || !$mentorMsg) {
+                throw new \Exception("Messages_SAVE_ERROR");
+            }
+
+            // Agar hamma narsa muvaffaqiyatli bo'lsa, bazaga saqlaymiz
+            $transaction->commit();
+
+        } catch (\Exception $e) {
+            // Xatolik bo'lsa, barcha amallarni bekor qilamiz (Rollback)
+            $transaction->rollBack();
+            
+            // Xatoni logga yozish yoki foydalanuvchiga ko'rsatish
+            Yii::error("Xatolik: handleUserGenerateTopicda: chat_id={$chatId}, xatolik xabari: {$e->getMessage()}");
+
+            $this->sendStreamError("Xatolik yuz berdi! Iltimos sahifani qayta yuklang");
+        }
 
         Yii::$app->response->isSent = true;
         Yii::$app->end();
     }
 
-    private function handleUserGeneratePractice(string $prompt, array $topic, array $level): void
+    /**
+     * Mavzuning keyingi qismini frontga uzatadi.
+     *
+     * @param int   $chatId   Joriy chat ID
+     * @param array $topic    Topic ma'lumotlari (kamida ['id'])
+    */
+    public function actionContinueTopic(): void
+    {
+        $this->requireAjax();
+        $body  = Yii::$app->request->getBodyParams();
+        $chatId = $this->resolveChat((int) ($body['topic_id'] ?? 0))['id'];   
+        // ── Oxirgi mentor xabarining step_topic_index ini topamiz ─────────────
+        $lastMentorMessage = Messages::find()
+            ->select(['id', 'step_topic_index'])
+            ->where([
+                'chat_id'     => $chatId,
+                'sender_role' => 'mentor',
+                'type'        => 'topic',
+            ])
+            ->orderBy(['id' => SORT_DESC])
+            ->asArray()
+            ->one();
+
+        if (!$lastMentorMessage) {
+            $this->sendStreamError('Xatolik yuz berdi! Iltimos sahifani qayta yuklang');
+            return;
+        }
+
+        $currentIndex = (int) $lastMentorMessage['step_topic_index'];
+        $nextIndex    = $currentIndex + 1;
+
+        // ── master_lessons dan ma'lumot olish ─────────────────────────────────
+        $masterLesson = MasterLessons::find()
+            ->where(['chat_id' => $chatId])
+            ->one();
+
+        if (!$masterLesson) {
+            Yii::error("continueTopic: masterLesson topilmadi: chat_id={$chatId}");
+            $this->sendStreamError('Xatolik yuz berdi! Iltimos sahifani qayta yuklang');
+            return;
+        }
+
+        $parts      = explode('[NEXT]', $masterLesson->full_content);
+        $totalParts = (int) $masterLesson->total_parts;
+
+        if (!isset($parts[$nextIndex])) {
+            Yii::error("continueTopic: masterLessonda mavzu qismi topilmadi: chat_id={$chatId}, step={$nextIndex}");
+            $this->sendStreamError('Keyingi qism mavjud emas! Iltimos sahifani qayta yuklang');
+            return;
+        }
+
+        $nextPartText = trim($parts[$nextIndex]);
+
+        // Tranzaksiyani boshlash
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            // 1. System xabari: "Davom etish"
+            $systemMsg = Messages::create($chatId, 'system', 'command', ['text' => 'Davom etish']);
+            if (!$systemMsg) {
+                throw new \Exception("System xabari saqlanmadi: chat_id={$chatId}");
+            }
+
+            // 2. Mentor xabarini saqlash
+            $mentorMsg = Messages::create($chatId, 'mentor', 'topic', ['text' => $nextPartText], $nextIndex);
+            if (!$mentorMsg) {
+                throw new \Exception("Mentor xabari saqlanmadi: chat_id={$chatId}, step={$nextIndex}");
+            }
+
+            // 3. Chats jadvalida current_stage ni oshirish
+            $updateCount = Chats::updateAll(
+                ['current_stage' => new \yii\db\Expression('current_stage + 1')],
+                ['id' => $chatId]
+            );
+
+            if ($updateCount === 0) {
+                throw new \Exception("Chat holati yangilanmadi: chat_id={$chatId}");
+            }
+
+            // Hammasi yaxshi bo'lsa, bazaga tasdiqlaymiz
+            $transaction->commit();
+
+        } catch (\Exception $e) {
+            // Xatolik bo'lsa, ortga qaytaramiz
+            $transaction->rollBack();
+
+            // Logga yozamiz
+            Yii::error("continueTopic xatoligi: " . $e->getMessage());
+
+            // Foydalanuvchiga xato xabarini yuboramiz
+            $this->sendStreamError("Noma'lum xatolik yuz berdi! Iltimos sahifani qayta yuklang");
+            return;
+        }
+
+        // ── Keyingi qismni frontga yuborish ───────────────────────────────────
+        echo 'data: ' . json_encode(['content' => $nextPartText]) . "\n\n";
+        flush();
+        if (($nextIndex + 1) === $totalParts) {
+            echo "data: [DONE:end]\n\n";
+        } else {
+            echo "data: [DONE:more]\n\n";
+        }
+        flush();
+
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
+    }
+
+    private function streamFirstPartOnly(string $prompt): ?string
+    {
+        $gemini_api = new GeminiApiService();
+        $gemini_api->prepareSystemForStreaming();
+
+        $fullContent   = '';
+        $firstPartSent = false;
+
+        // [NEXT] belgisi bir nechta chunk ga bo'linib kelishi mumkin.
+        // Shuning uchun oxirgi 6 belgini alohida saqlab, keyingi chunk bilan
+        // birgalikda tekshiramiz.
+        $tailBuffer = '';
+
+        try {
+            $gemini_api->streamContent($prompt, function (string $chunk) use (
+                &$fullContent,
+                &$firstPartSent,
+                &$tailBuffer
+            ) {
+                $fullContent .= $chunk;
+
+                // 1-qism yuborilgan bo'lsa — chunk faqat $fullContent ga yig'iladi
+                if ($firstPartSent) {
+                    return;
+                }
+
+                // Tail buffer + yangi chunk birlashtirilib [NEXT] axtariladi
+                $search  = $tailBuffer . $chunk;
+                $nextPos = strpos($search, '[NEXT]');
+
+                if ($nextPos !== false) {
+                    // [NEXT] gacha bo'lgan qismni frontga yuboramiz
+                    $toSend = substr($search, 0, $nextPos);
+
+                    if ($toSend !== '') {
+                        echo 'data: ' . json_encode(['content' => $toSend]) . "\n\n";
+                        echo "data: [DONE:more]\n\n";
+                        flush();
+                    }
+
+                    $firstPartSent = true;
+                    $tailBuffer    = '';
+
+                } else {
+                    // [NEXT] hali yo'q.
+                    // Oxirgi 6 belgini tailBuffer da saqlab, qolganini frontga yuboramiz.
+                    $toSend     = strlen($search) > 6 ? substr($search, 0, -6) : '';
+                    $tailBuffer = strlen($search) > 6 ? substr($search, -6) : $search;
+
+                    if ($toSend !== '') {
+                        echo 'data: ' . json_encode(['content' => $toSend]) . "\n\n";
+                        flush();
+                    }
+                }
+            });
+
+            // Agar [NEXT] umuman bo'lmasa — tailBuffer ham frontga chiqishi kerak
+            if (!$firstPartSent && $tailBuffer !== '') {
+                echo 'data: ' . json_encode(['content' => $tailBuffer]) . "\n\n";
+                flush();
+            }
+
+            echo "data: [DONE:end]\n\n";
+            flush();
+
+            return $fullContent;
+
+        } catch (\Throwable $e) {
+            $this->sendStreamError($this->resolveStreamErrorMessage($e));
+            return null;
+        }
+    }
+
+
+    private function calculateTotalStages(string $topicType, int $total_parts): int
+    {
+        switch ($topicType) {
+            case 'theory':
+                return $total_parts;          // n qism + 1 xulosa
+
+            case 'practice':
+                return 2;                          // 1. Berilishi + 2. Yechim tahlili
+
+            case 'lesson':
+                return ($total_parts + 1) + 2 + 2;
+
+            default:
+                return 0;
+        }
+    }
+
+    private function handleUserGeneratePractice(string $prompt, array $topic): void
     {
         $content = '';
 
@@ -410,16 +677,48 @@ class ChatController extends Controller
             $content .= $chunk;
         });
 
-        // TODO: UserPractice::create([
-        //     'user_id'   => Yii::$app->user->id,
-        //     'topic_id'  => $topic['id'],
-        //     'level_id'  => $level['id'],
-        //     'practices' => $content,
-        //     'status'    => UserPractice::STATUS_PENDING,
-        // ]);
+        $chat_id = $this->resolveChat($topic['id'])['id'];
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            // 1. System xabari: "Davom etish"
+            $systemMsg = Messages::create($chat_id, 'system', 'command', ['text' => 'Amaliy topshiriqlar']);
+            if (!$systemMsg) {
+                throw new \Exception("System xabari saqlanmadi: chat_id={$chat_id}");
+            }
+
+            // 2. Mentor xabarini saqlash
+            $mentorMsg = Messages::create($chat_id, 'mentor', 'practice', ['text' => $content]);
+            if (!$mentorMsg) {
+                throw new \Exception("Mentor amaliy topshirig'i saqlanmadi: chat_id={$chat_id}");
+            }
+
+            // 3. Chats jadvalida current_stage ni oshirish
+            $updateCount = Chats::updateAll(
+                ['current_stage' => new \yii\db\Expression('current_stage + 1')],
+                ['id' => $chat_id]
+            );
+
+            if ($updateCount === 0) {
+                throw new \Exception("Chat holati yangilanmadi: chat_id={$chat_id}");
+            }
+
+            // Hammasi yaxshi bo'lsa, bazaga tasdiqlaymiz
+            $transaction->commit();
+
+        } catch (\Exception $e) {
+            // Xatolik bo'lsa, ortga qaytaramiz
+            $transaction->rollBack();
+
+            // Logga yozamiz
+            Yii::error("handleUserGeneratePractice xatoligi: " . $e->getMessage());
+        }
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
     }
 
-    private function handleUserAskQuestion(string $prompt, array $topic, array $level, string $user_question): void
+    private function handleUserAskQuestion(string $prompt, array $topic, string $user_question): void
     {
         $answer = '';
 
@@ -427,16 +726,34 @@ class ChatController extends Controller
             $answer .= $chunk;
         });
 
-        // TODO: UserQuestion::create([
-        //     'user_id'   => Yii::$app->user->id,
-        //     'topic_id'  => $topic['id'],
-        //     'level_id'  => $level['id'],
-        //     'question'  => $user_question,
-        //     'answer'    => $answer,
-        // ]);
+        $chat_id = $this->resolveChat($topic['id'])['id'];
+
+        $transaction = Yii::$app->db->beginTransaction();
+        
+        try {
+            $userMsg = Messages::create($chat_id, 'user', 'text', ["text" => $user_question]);
+            if (!$userMsg) {
+                throw new \Exception("User savoli saqlanmadi: chat_id={$chat_id}");
+            }
+
+            $mentorMsg = Messages::create($chat_id, 'mentor', 'text', ["text" => $answer]);
+            if (!$mentorMsg) {
+                throw new \Exception("User savoliga mentor javobi saqlanmadi: chat_id={$chat_id}");
+            }
+
+            $transaction->commit();
+
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+
+            // Logga yozamiz
+            Yii::error("handleUserAskQuestion xatoligi: " . $e->getMessage());   
+        }
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
     }
 
-    private function handleUserCheckPractice(string $prompt, array $topic, array $level): void
+    private function handleUserCheckPractice(string $prompt, array $topic, array $answers): void
     {
         $feedback = '';
 
@@ -444,15 +761,50 @@ class ChatController extends Controller
             $feedback .= $chunk;
         });
 
-        // TODO: UserPractice::updateFeedback([
-        //     'user_id'  => Yii::$app->user->id,
-        //     'topic_id' => $topic['id'],
-        //     'feedback' => $feedback,
-        //     'status'   => UserPractice::STATUS_CHECKED,
-        // ]);
+        $chat_id = $this->resolveChat($topic['id'])['id'];
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            // 1. System xabari: "Davom etish"
+            foreach ($answers as $answer){
+                $userMsg = Messages::create($chat_id, 'user', 'text', ['text' => "{$answer['task_number']}-topshiriq javobi: \n {$answer['answer']}"]);
+                if (!$userMsg) {
+                    throw new \Exception("User xabari saqlanmadi: chat_id={$chat_id}");
+                }
+            }
+
+            // 2. Mentor xabarini saqlash
+            $mentorMsg = Messages::create($chat_id, 'mentor', 'practice_result', ['text' => $feedback]);
+            if (!$mentorMsg) {
+                throw new \Exception("Mentor amaliy topshiriqni tekshirgani saqlanmadi: chat_id={$chat_id}");
+            }
+
+            // 3. Chats jadvalida current_stage ni oshirish
+            $updateCount = Chats::updateAll(
+                ['current_stage' => new \yii\db\Expression('current_stage + 1')],
+                ['id' => $chat_id]
+            );
+
+            if ($updateCount === 0) {
+                throw new \Exception("Chat holati yangilanmadi: chat_id={$chat_id}");
+            }
+
+            // Hammasi yaxshi bo'lsa, bazaga tasdiqlaymiz
+            $transaction->commit();
+
+        } catch (\Exception $e) {
+            // Xatolik bo'lsa, ortga qaytaramiz
+            $transaction->rollBack();
+
+            // Logga yozamiz
+            Yii::error("handleUserCheckPractice xatoligi: " . $e->getMessage());
+        }
+        Yii::$app->response->isSent = true;
+        Yii::$app->end();
     }
 
-    private function handleUserGenerateQuizTest(string $prompt, array $topic, array $level): array
+    private function handleUserGenerateQuizTest(string $prompt, array $topic)
     {
         $raw  = (new GeminiApiService())->getContent($prompt);
 
@@ -462,41 +814,112 @@ class ChatController extends Controller
 
         $json = $this->parseJsonResponse($raw);
         if ($json === null) {
-            return $this->asJson(['success' => false, 'message' => "Javobni o'qishda xatolik yuz berdi!"]);
+            return $this->asJson(['success' => false, 'message' => "Test hosil qilishda xatolik yuz berdi! Iltimos sahifani qayta yuklang"]);
         }
 
         [$quiz_data, $quiz_clean] = $this->splitQuizData($json['quiz']);
 
-        // TODO: Sessiondan DB'ga ko'chirish kerak:
-        // UserQuiz::createPending([
-        //     'user_id'   => Yii::$app->user->id,
-        //     'topic_id'  => $topic['id'],
-        //     'level_id'  => $level['id'],
-        //     'quiz_data' => $quiz_data,
-        // ]);
-        Yii::$app->session->setFlash('quiz_test_data', $quiz_data); // vaqtinchalik
+        $content = [];
+
+        for ($i = 0; $i < count($quiz_clean); $i++) {
+            $content[$i]["data"] = $quiz_clean[$i];
+            $content[$i]["answers"] = $quiz_data[$i];
+        }
+
+        $chat_id = $this->resolveChat($topic['id'])['id'];
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            $systemMsg = Messages::create($chat_id, 'system', 'command', ["text" => "Quiz testlar"]);
+            if (!$systemMsg) {
+                throw new \Exception("System xabari saqlanmadi: chat_id={$chat_id}");
+            }
+
+            // 2. Mentor xabarini saqlash
+            $mentorMsg = Messages::create($chat_id, 'mentor', 'quiz', $content);
+            if (!$mentorMsg) {
+                throw new \Exception("Mentor quiz testi saqlanmadi: chat_id={$chat_id}");
+            }
+
+            $updateCount = Chats::updateAll(
+                ['current_stage' => new \yii\db\Expression('current_stage + 1')],
+                ['id' => $chat_id]
+            );
+
+            $transaction->commit();
+
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+
+            Yii::error("handleUserGenerateQuizTest xatoligi: " . $e->getMessage());
+
+            return $this->asJson(['success' => false, 'message' => "Noma'lum xatolik yuz berdi! Iltimos sahifani qayta yuklang"]);
+        }
 
         return $this->asJson(['success' => true, 'data' => $quiz_clean]);
     }
 
-    private function handleUserCheckQuiz(array $selected): array
+    private function handleUserCheckQuiz(array $selected)
     {
-        // TODO: $quiz_data = UserQuiz::getPendingByUserId(Yii::$app->user->id);
-        $quiz_data = Yii::$app->session->getFlash('quiz_test_data'); // vaqtinchalik
+        $body     = Yii::$app->request->getBodyParams();
+        $course = $this->resolveCourse();
+        $topic = $this->resolveTopic((int) ($body['topic_id'] ?? 0), $course['id'], useJson: true);
+        $chat_id = $this->resolveChat($topic['id'])['id'];
+        $quiz_content = Messages::find()
+            ->select('content')
+            ->where(["chat_id" => $chat_id, 'sender_role' => 'mentor', 'type' => 'quiz'])
+            ->asArray()
+            ->one()['content'];
+        $quiz_clean_content = json_decode($quiz_content, true);
+        $quiz_answers = [];
+        for ($i = 0; $i < count($quiz_clean_content); $i++) {
+            $quiz_answers[$i] = $quiz_clean_content[$i]["answers"];
+        }
 
-        if (empty($quiz_data)) {
+        if (empty($quiz_answers)) {
             return $this->asJson([
                 'success' => false,
                 'message' => "Testlarni tekshirishda xatolik! Iltimos sahifani qayta yuklang",
             ]);
         }
 
-        $results = $this->buildQuizResults($selected, $quiz_data);
+        $results = $this->buildQuizResults($selected, $quiz_answers);
 
-        // TODO: UserQuiz::saveResults([
-        //     'user_id' => Yii::$app->user->id,
-        //     'results' => $results,
-        // ]);
+        for ($i = 0; $i < count($results); $i++) {
+            $quiz_clean_content[$i]["user-results"] = [
+                "status" => $results[$i]["status"],
+                "selected" => $results[$i]["selected"]
+            ];
+        }
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            $quiz_msg = Messages::findOne(["chat_id" => $chat_id, "sender_role" => 'mentor', "type" => 'quiz']);
+            if (!$quiz_msg) {
+                throw new \Exception("Quiz test topilmadi: chat_id={$chat_id}");
+            }
+
+            $quiz_msg->content = $quiz_clean_content;
+            if (!$quiz_msg->save()) {
+                throw new \Exception("Tekshirilgan quiz test saqlanmadi: chat_id={$chat_id}");   
+            }
+
+            $updateCount = Chats::updateAll(
+                ['current_stage' => new \yii\db\Expression('current_stage + 1')],
+                ['id' => $chat_id]
+            );
+
+            $transaction->commit();
+
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+
+            Yii::error("handleUserCheckQuiz xatoligi: " . $e->getMessage());
+
+            return $this->asJson(['success' => false, 'message' => "Noma'lum xatolik yuz berdi! Iltimos sahifani qayta yuklang"]);
+        }
 
         return $this->asJson([
             'success' => true,
@@ -613,20 +1036,24 @@ class ChatController extends Controller
     }
  
     // faqat userlar uchun
-    private function resolveChat(int $topic_id) {
+    private function resolveChat(int $topic_id, array $extra_data = []) {
+        $needed_data = array_merge(['id'], $extra_data);
         $data = Chats::find()
-            ->select(['id'])
-            ->where(['topic_id' => $topic_id, "user_data_id" => Yii::$app->user->identity->last_active_user_data_id])
+            ->select($needed_data)
+            ->where([
+                'topic_id' => $topic_id,
+                "user_data_id" => Yii::$app->user->identity->last_active_user_data_id
+            ])
             ->asArray()
             ->one();
 
         if (!$data) {
-            $new_chat = Chats::create($topic_id, 1);
+            $new_chat = Chats::create($topic_id, 0, $needed_data);
 
             if (!$new_chat['success']) return false;
-            return $new_chat['id'];
+            return $new_chat['data'];
         } else {
-            return $data['id'];
+            return $data;
         }
     }
 
@@ -692,7 +1119,7 @@ class ChatController extends Controller
     {
         return match ($e->getMessage()) {
             'NETWORK_ERROR' => "Tarmoq xatoligi yuz berdi. Iltimos keyinroq urinib ko'ring!",
-            'API_ERROR'     => "Bot javob bermayapti. Iltimos keyinroq urinib ko'ring!",
+            'API_ERROR'     => "Mentor javob bermayapti. Iltimos keyinroq urinib ko'ring!",
             default         => "Noma'lum xatolik yuz berdi. Iltimos keyinroq urinib ko'ring!",
         };
     }
@@ -743,7 +1170,9 @@ class ChatController extends Controller
 
         foreach ($quiz as $i => $item) {
             $quiz_data[$i]  = ['correct' => $item['correct'], 'explanation' => $item['explanation']];
-            $quiz_clean[$i] = array_merge($item, ['correct' => '', 'explanation' => '']);
+            $clean_item = $item;
+            unset($clean_item['correct'], $clean_item['explanation']);
+            $quiz_clean[$i] = $clean_item;
         }
 
         return [$quiz_data, $quiz_clean];
@@ -757,18 +1186,17 @@ class ChatController extends Controller
         $results = [];
 
         for ($i = 0; $i < 5; $i++) {
+            $results[$i]['status'] = 'unkown';
+            $results[$i]['correct'] = $quiz_data[$i]['correct'];
+            $results[$i]['selected'] = $selected[$i] ?? null;
             $results[$i]['explanation'] = $quiz_data[$i]['explanation'];
 
             if (!array_key_exists($i, $selected) || $selected[$i] === null) {
                 $results[$i]['status']  = 'unanswered';
-                $results[$i]['correct'] = $quiz_data[$i]['correct'];
             } elseif ($quiz_data[$i]['correct'] === $selected[$i]) {
                 $results[$i]['status']   = 'correct';
-                $results[$i]['selected'] = $selected[$i];
             } else {
                 $results[$i]['status']   = 'incorrect';
-                $results[$i]['correct']  = $quiz_data[$i]['correct'];
-                $results[$i]['selected'] = $selected[$i];
             }
         }
 

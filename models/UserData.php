@@ -86,4 +86,29 @@ class UserData extends \yii\db\ActiveRecord
         return $this->hasOne(Users::class, ['id' => 'user_id']);
     }
 
+    public static function create(int $user_id, int $course_id, int $level_id) {
+        $model = new self();
+        $model->user_id = $user_id;
+        $model->course_id = $course_id;
+        $model->level_id = $level_id;
+        if ($model->save()) {
+            return [
+                'success' => true,
+                'id' => $model->id
+            ];
+        } else {
+            Yii::error([
+                "message" => "UserData qo'shishda xatolik",
+                "user_data" => [
+                    "id" => $user_id,
+                ],
+                "course_id" => $course_id,
+                "level_id" => $level_id
+            ]);
+
+            return [
+                'success' => false
+            ];
+        }
+    }
 }

@@ -41,6 +41,7 @@ async function askQuestionAboutTopic(userQuestion) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     const urlParams = new URLSearchParams(window.location.search);
 
+    const chatRenderer = makeStreamingRenderer(messageDiv, loader);
     await fetchWithStreaming(
       'ask-question-about-topic',
       {
@@ -52,22 +53,22 @@ async function askQuestionAboutTopic(userQuestion) {
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({
-          course_id: urlParams.get('course_id'),
           topic_id: urlParams.get('topic_id'),
-          level_id: urlParams.get('level_id'),
+          level: urlParams.get('level'),
           user_question: userQuestion,
         }),
       },
-      makeStreamingRenderer(messageDiv, loader)
+      chatRenderer.onChunk
     );
-
-    const promptDiv = createBotMessageContainer();
-    promptDiv.classList.add('bot');
-    typeText(
-      promptDiv,
-      "Agar barchasi tushunarli bo'lgan bo'lsa pastdagi 👇 tugmani bosib keyingi bosqichga o'tishingiz mumkin",
-      () => restoreLastRemovedNextStepButton()
-    );
+    chatRenderer.flush(() => {
+      const promptDiv = createBotMessageContainer();
+      promptDiv.classList.add('bot');
+      typeText(
+        promptDiv,
+        "Agar barchasi tushunarli bo'lgan bo'lsa pastdagi 👇 tugmani bosib keyingi bosqichga o'tishingiz mumkin",
+        () => restoreLastRemovedNextStepButton()
+      );
+    });
   } catch (error) {
     hideLoader(loader);
     addBotMessage('❌ ' + error.message);
