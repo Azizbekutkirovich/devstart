@@ -32,74 +32,55 @@ function restoreChat(history) {
 
 // ════════════════════════════════════════════
 //  inferStepFromHistory
-//
-//  History ga qarab FlowManager uchun keyingi
-//  step ni va qo'shimcha amallarni aniqlaydi.
-//
-//  Qaytaradi:
-//  {
-//    step: number,
-//      — FlowManager.init ga beriladigan boshlang'ich step
-//      — 99 = FlowManager hech narsa ko'rsatmaydi
-//          (tugma allaqachon DOM da yoki boshqa holatda)
-//
-//    continueTopic: boolean,
-//      — true bo'lsa topic hali tugamagan:
-//        "Davom etish" tugmasini ko'rsatish kerak
-//
-//    practiceInputs: boolean
-//      — true bo'lsa practice content bor lekin javob yo'q:
-//        textarea va "Yuborish" tugmasini tiklash kerak
-//  }
 // ════════════════════════════════════════════
+// restorer.js
 function inferStepFromHistory(history) {
-  const FALLBACK = { step: 0, continueTopic: false, practiceInputs: false };
-
+  const FALLBACK = { step: 0, continueTopic: false, practiceInputs: false, isPending: false };
   if (!Array.isArray(history) || history.length === 0) return FALLBACK;
 
   const types = history.map((h) => h.type);
-
   const hasTopicParts      = types.includes('bot_topic');
   const hasQuiz            = types.includes('quiz');
   const hasPractice        = types.includes('bot_practice');
   const hasPracticeResult  = types.includes('bot_practice_result');
 
-  // Practice tekshiruvi tugagan → "Keyingi mavzu" tugmasi
+  // 1. Practice natijasi bor -> Hammasi tugagan, step: 3 (end)
   if (hasPracticeResult) {
-    return { step: 3, continueTopic: false, practiceInputs: false };
+    return { step: 3, continueTopic: false, practiceInputs: false, isPending: false };
   }
 
-  // Practice content bor, lekin natija yo'q → inputs va "Yuborish" tugmasini tiklash
+  // 2. Practice bor lekin natija yo'q -> Step: 2 (practice) va kutish rejimida
   if (hasPractice) {
-    return { step: 99, continueTopic: false, practiceInputs: true };
+    return { step: 2, continueTopic: false, practiceInputs: true, isPending: true };
   }
 
-  // Quiz bor
+  // 3. Quiz bor
   if (hasQuiz) {
     const quizItem = history.find((h) => h.type === 'quiz');
     const quizDone = quizItem?.data?.results?.length > 0;
-
-    // Quiz natijasi bor → "Amaliy topshiriq" tugmasi
-    if (quizDone) return { step: 2, continueTopic: false, practiceInputs: false };
-
-    // Quiz natijasi yo'q → quiz UI da "Testni yakunlash" ko'rinib turibdi
-    return { step: 99, continueTopic: false, practiceInputs: false };
+    
+    if (quizDone) {
+        // Quiz tugagan -> Step: 2 (practice) tugmasi chiqishi kerak
+        return { step: 2, continueTopic: false, practiceInputs: false, isPending: false };
+    }
+    // Quiz tugallanmagan -> Step: 1 (quiz) va kutish rejimida
+    return { step: 1, continueTopic: false, practiceInputs: false, isPending: true };
   }
 
-  // Faqat topic qismlari bor
+  // 4. Topic bor
   if (hasTopicParts) {
     const topicCompleted = window.__RESUME__?.topic_completed ?? true;
-
-    // Topic tugagan → "Testlarni boshlash" tugmasi
-    if (topicCompleted) return { step: 1, continueTopic: false, practiceInputs: false };
-
-    // Topic hali davom etmoqda → "Davom etish" tugmasi
-    return { step: 99, continueTopic: true, practiceInputs: false };
+    if (topicCompleted) {
+        // Topic tugagan -> Step: 1 (quiz) tugmasi chiqishi kerak
+        return { step: 1, continueTopic: false, practiceInputs: false, isPending: false };
+    }
+    // Topic davom etmoqda -> Step: 0 (topic) va kutish rejimida
+    return { step: 0, continueTopic: true, practiceInputs: false, isPending: true };
   }
 
-  // Hech narsa yo'q → yangi chat
   return FALLBACK;
 }
+
 
 // ── Alohida tiklovchilar ─────────────────────
 

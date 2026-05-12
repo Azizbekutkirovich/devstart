@@ -62,7 +62,7 @@ $this->registerCssFile(Url::base()."/css/auth/start-user.css");
 
       <!-- ── STEP 1 (only step) ── -->
       <div class="step-panel active" id="step1">
-        <h2 class="step-heading">Darajangizni tanlang</h2>
+        <h2 class="step-heading">Kursni qanday darajada o'tilishini xohlaysiz?</h2>
         <p class="step-sub">Bilim darajangizga mos bosqichni belgilang</p>
         <div class="level-grid">
           <?php

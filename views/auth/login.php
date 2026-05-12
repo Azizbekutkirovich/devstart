@@ -19,8 +19,8 @@
       </div>
 
       <!-- Title -->
-      <h1 class="login-title">DevStart<span>ga</span> kirish</h1>
-      <p class="login-subtitle">Dasturlash sayohatingizni davom ettiring</p>
+      <h1 class="login-title">Devstart<span>ga</span> kirish</h1>
+      <p class="login-subtitle">Dasturlash olamiga sayohatingizni davom ettiring</p>
       <!-- Google -->
       <a href="http://localhost/devstart/auth/google-redirect?operation=login" class="btn-google">
         <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

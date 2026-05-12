@@ -46,13 +46,11 @@
 	gap: 8px;
 	font-family: 'Space Mono', monospace;
 	font-size: .7rem;
-	color: rgba(255, 255, 255, .5);
 	letter-spacing: .1em;
 	margin-bottom: 20px;
 }
 
 .course-hero-breadcrumb a {
-	color: var(--accent);
 	text-decoration: none;
 }
 
@@ -78,11 +76,10 @@
 
 .course-hero-title {
 	font-family: 'Syne', sans-serif;
-	font-weight: 800;
+	font-weight: 700;
 	font-size: clamp(1.8rem, 4vw, 3.2rem);
 	letter-spacing: -.04em;
 	line-height: 1.05;
-	color: #fff;
 	margin-bottom: 12px;
 }
 
@@ -175,7 +172,6 @@
 }
 
 .course-about-text {
-	color: var(--text-muted);
 	font-size: .95rem;
 	line-height: 1.8;
 	font-weight: 300;
@@ -215,7 +211,6 @@
 
 .learn-text {
 	font-size: .85rem;
-	color: var(--text-muted);
 	line-height: 1.5;
 	font-weight: 400;
 }
@@ -527,7 +522,6 @@
 
 .mentor-sidebar-desc {
 	font-size: .83rem;
-	color: var(--text-muted);
 	line-height: 1.6;
 	font-weight: 300;
 }

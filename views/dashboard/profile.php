@@ -38,7 +38,7 @@
       </div>
 
       <div class="info-row">
-        <span class="info-key">📛 Ism familya</span>
+        <span class="info-key">🪪 Ism va Familya</span>
         <span class="info-val"><?=$fullname?></span>
       </div>
       <div class="info-row">

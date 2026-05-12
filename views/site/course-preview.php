@@ -41,7 +41,7 @@
       $learn_features = json_decode($course['learn_features'], true);
     ?>
     <div class="info-block reveal">
-      <div class="info-block-title">Nima o'rganasiz?</div>
+      <div class="info-block-title">Nimalarni o'rganasiz?</div>
       <div class="learn-grid">
         <?php foreach($learn_features as $feature): ?>
         <div class="learn-item">
@@ -70,7 +70,7 @@
           </div>
           <div class="module-lessons">
             <?php foreach ($module['topics'] as $topic): ?>
-            <a href="#" class="lesson-item">
+            <a href="<?=Url::to(['auth/start', 'course_id' => $course['id']])?>" class="lesson-item">
               <span class="lesson-icon">▶</span>
               <span class="lesson-title"><?=$topic['title']?></span>
             </a>

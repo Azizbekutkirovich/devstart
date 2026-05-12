@@ -45,7 +45,7 @@ $this->registerCssFile(Url::base()."/css/dashboard/home.css");
   <div class="topbar">
     <div class="welcome-text">
       <h1>Salom, <?=$fullname?>! 👋</h1>
-      <p>O'rganishda davom eting. Siz yaxshi yo'ldasiz.</p>
+      <p>O'rganishda davom eting. Siz to'g'ri yo'ldasiz.</p>
     </div>
     <div class="streak-badge">
       <img style="width: 20px; height: 20px;" src="<?=Url::base()?>/images/icons/<?=$level['img']?>" alt="daraja rasmi">

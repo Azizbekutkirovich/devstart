@@ -35,60 +35,49 @@ const FLOWS = {
   ],
 };
 
-// ── FlowManager ──────────────────────────────
+// FlowManager
 const FlowManager = (() => {
-  let _steps    = [];    // Joriy oqim qadamlari
-  let _index    = -1;    // Hozirgi qadam indeksi
+  let _steps    = [];
+  let _index    = -1;
   let _flowName = '';
 
   /**
-   * Oqimni boshlash.
-   * @param {keyof FLOWS} flowName  — qaysi oqim ishlatilsin
-   * @param {number} [startFrom=0] — qaysi qadamdan boshlansin (resume uchun)
+   * @param {string} flowName 
+   * @param {number} startFrom - Boshlang'ich qadam (0, 1, 2...)
+   * @param {boolean} isPending - Agar true bo'lsa, joriy qadam tugmachasini chiqarmaydi
    */
-  function init(flowName = 'default', startFrom = 0) {
+  function init(flowName = 'lesson', startFrom = 0, isPending = false) {
     _flowName = flowName;
-    _steps    = FLOWS[flowName] ?? FLOWS.default;
-    _index    = startFrom - 1; // stepDone() birinchi marta +1 qiladi
-    _showNextButton();
+    _steps    = FLOWS[flowName] ?? FLOWS.lesson;
+    _index    = startFrom; 
+
+    // Agar jarayon tugallanmagan (isPending) bo'lsa, 
+    // keyingi bosqich tugmasini chiqarmaymiz, foydalanuvchi amalini kutamiz.
+    if (!isPending) {
+      _showNextButton(true); // true - joriy indeksdagi tugmani ko'rsatish
+    }
   }
 
-  /**
-   * Qadam tugagach chaqiriladi.
-   * topic.js:    stepDone('topic')
-   * quiz.js:     stepDone('quiz')
-   * practice.js: stepDone('practice')
-   */
   function stepDone(stepId) {
     const current = _steps[_index];
-
-    // Joriy qadam id si mos kelishini tekshiramiz (ixtiyoriy, debug uchun)
     if (current && current.id !== stepId) {
       console.warn(`FlowManager: kutilgan "${current.id}", kelgan "${stepId}"`);
     }
-
-    _showNextButton();
+    _showNextButton(false); // Keyingi qadamga o'tish
   }
 
-  // ── Private ─────────────────────────────────
-  function _showNextButton() {
-    _index++;
+  function _showNextButton(showCurrent = false) {
+    if (!showCurrent) _index++; 
 
-    if (_index >= _steps.length) {
-      // Oqim tugadi
-      return;
-    }
+    if (_index >= _steps.length) return;
 
     const step = _steps[_index];
-
-    // Tugma nomidan oldin bot xabar (ixtiyoriy)
     _showPromptMessage(step, () => {
       createButton(step.label, `flow-btn-${step.id}`);
     });
   }
 
   function _showPromptMessage(step, callback) {
-    // Har bir qadam oldidan ko'rsatiladigan yo'naltiruvchi matn
     const prompts = {
       quiz:     "Pastdagi 👇 tugmani bossangiz <strong>Mavzuga oid testlar</strong> taqdim etiladi",
       practice: "Pastdagi 👇 tugmani bossangiz <strong>Amaliy topshiriqlar</strong> taqdim etiladi",
@@ -96,41 +85,26 @@ const FlowManager = (() => {
     };
 
     const text = prompts[step.id];
-    if (!text) {
-      callback?.();
-      return;
-    }
+    if (!text) { callback?.(); return; }
 
     const div = createBotMessageContainer();
     div.classList.add('bot');
     typeText(div, text, callback);
   }
 
-  /**
-   * Tugma bosilganda app.js bu funksiyani chaqiradi.
-   * Tugmani o'chiradi va tegishli action ni ishga tushiradi.
-   * @param {string} btnId  — "flow-btn-topic" kabi id
-   */
   function handleButton(btnId) {
     const stepId = btnId.replace('flow-btn-', '');
     const step   = _steps.find((s) => s.id === stepId);
-
-    if (!step) {
-      console.warn('FlowManager: step topilmadi:', stepId);
-      return;
-    }
+    if (!step) return;
 
     if (step.removeBtn) {
       document.getElementById(btnId)?.closest('.center-btn')?.remove();
     }
 
-    // Action funksiyasini chaqirish (global scope dan)
     const fn = window[step.action];
     if (typeof fn === 'function') {
       addUserMessage(step.label);
       fn();
-    } else {
-      console.error(`FlowManager: "${step.action}" funksiyasi topilmadi`);
     }
   }
 

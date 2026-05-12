@@ -26,7 +26,7 @@
       <div class="mission-card">
         <span class="mission-icon">🤖</span>
         <div class="mission-title">AI Shaxsiy Mentor</div>
-        <div class="mission-text">Sun'iy intellekt har bir o'quvchining bilim darajasini tahlil qilib, eng mos ta'lim yo'lini tavsiya qiladi va savollaringizga darhol javob beradi.</div>
+        <div class="mission-text">Sun'iy intellekt siz tanlagan darajaga moslab dars o'tadi va savollaringizga darhol javob beradi.</div>
       </div>
       <div class="mission-card">
         <span class="mission-icon">⚡</span>
@@ -153,7 +153,7 @@
     <div class="cta-inner">
       <div class="cta-text">
         <h3 class="cta-title">Bugun o'rganishni boshlang</h3>
-        <p class="cta-sub">Birinchi dars — bepul. Hech qanday kredit karta talab qilinmaydi.</p>
+        <p class="cta-sub">Barcha kurslar — bepul</p>
       </div>
       <a href="<?=Url::to(['site/courses'])?>" class="btn-cta">
         Kurslarni ko'rish

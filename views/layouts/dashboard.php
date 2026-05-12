@@ -14,6 +14,7 @@ DashboardAsset::register($this);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?= Html::csrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
+    <link rel="icon" type="image/png" href="<?=Url::base()?>/images/icons/devstart-logo-to-head.png">
     <?php $this->head() ?>
 </head>
 <body>
@@ -22,8 +23,7 @@ DashboardAsset::register($this);
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="logo">
-    <div class="logo-icon">🤖</div>
-    DevStart
+    <img src="<?=Url::base()?>/images/icons/devstart-logo.png" class="navbar-logo">
   </div>
 
   <nav class="nav-section">
@@ -77,8 +77,7 @@ DashboardAsset::register($this);
 <!-- MOBILE TOPBAR -->
 <div class="mobile-topbar">
   <div class="mobile-logo">
-    <div class="logo-icon">🤖</div>
-    DevStart
+    <img src="<?=Url::base()?>/images/icons/devstart-logo.png" class="navbar-logo">
   </div>
   <button class="burger" id="burger" aria-label="Menu">
     <span></span><span></span><span></span>

@@ -8,7 +8,7 @@ use yii\httpclient\CurlTransport;
 
 class GeminiApiService
 {
-	private $api_key = "AIzaSyBAC91Tzwh81W2djy0h0iMmFl9dsgvGxs4";
+	private $api_key = "AIzaSyAE7KdHF94jsvGQf7SVfbDy65IAYbT2zr8";
 
 	public function getContent(string $prompt)
 	{

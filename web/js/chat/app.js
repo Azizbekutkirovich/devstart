@@ -35,16 +35,15 @@ if (_history?.length) {
 }
 
 // ── 2. Step ni aniqlash va FlowManager ──────
-//    Restore bo'lsa → inferStepFromHistory
-//    Yangi chat    → step 0
 const _inferred = _history?.length
   ? inferStepFromHistory(_history)
-  : { step: 0, continueTopic: false, practiceInputs: false };
+  : { step: 0, continueTopic: false, practiceInputs: false, isPending: false };
 
 if (window.__USER_ROLE__ == 'guest') {
-  FlowManager.init(_flowName, 0);
+  FlowManager.init(_flowName, 0, false);
 } else {
-  FlowManager.init(_flowName, _inferred.step);
+  // Restore bo'lganda FlowManagerga isPending statusini ham beramiz
+  FlowManager.init(_flowName, _inferred.step, _inferred.isPending);
 }
 
 // ── 3. Qo'shimcha restore holatlari ──────────
