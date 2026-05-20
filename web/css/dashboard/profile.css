@@ -1,4 +1,4 @@
-/* ── MAIN ── */
+/* MAIN */
 .main {
   margin-left: var(--sidebar-w);
   flex: 1;
@@ -29,7 +29,7 @@ body.light-mode .page-header h1 {
   margin-top: 4px;
 }
 
-/* ── PROFILE GRID ── */
+/* PROFILE GRID */
 .profile-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -107,7 +107,7 @@ body.light-mode .card-title {
   border: 1px solid rgba(74, 222, 128, .25);
 }
 
-/* ── PROFILE IDENTITY ── */
+/* PROFILE IDENTITY */
 .profile-identity {
   display: flex;
   align-items: center;
@@ -183,7 +183,7 @@ body.light-mode .ident-info h2 {
   border: 1px solid rgba(129, 140, 248, .25);
 }
 
-/* ── INFO ROWS ── */
+/* INFO ROWS */
 .info-row {
   display: flex;
   align-items: center;
@@ -224,12 +224,12 @@ body.light-mode .info-row {
 }
 
 .verified-chip.unverified {
-  background: rgba(248, 113, 113, .1); /* Qizil (Red-400) shaffofligi */
+  background: rgba(248, 113, 113, .1);
   border: 1px solid rgba(248, 113, 113, .25);
-  color: #f87171; /* Qizil rang */
+  color: #f87171;
 }
 
-/* ── ACTION ROW ── */
+/* ACTION ROW */
 .action-row {
   display: flex;
   gap: 10px;
@@ -259,7 +259,7 @@ body.light-mode .info-row {
 }
 
 .btn-verify {
-  background: linear-gradient(135deg, #60a5fa, #3b82f6); /* Moviy rangli gradient */
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
   color: #fff;
   border-color: transparent;
   display: inline-flex;
@@ -270,7 +270,7 @@ body.light-mode .info-row {
 .btn-verify:hover {
   opacity: .9;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); /* Yengil soya effekti */
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .btn-verify:active {
@@ -287,7 +287,7 @@ body.light-mode .info-row {
   background: rgba(248, 113, 113, .1);
 }
 
-/* ── STATS ── */
+/* STATS */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -321,7 +321,7 @@ body.light-mode .stat-box {
   color: var(--muted);
 }
 
-/* ── COURSE PROGRESS ── */
+/* COURSE PROGRESS */
 .course-progress-item {
   margin-bottom: 14px;
 }
@@ -376,7 +376,7 @@ body.light-mode .cp-track {
   transition: width 1s ease;
 }
 
-/* ── ACTIVITY GRID ── */
+/* ACTIVITY GRID */
 .activity-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -425,7 +425,7 @@ body.light-mode .act-day {
   border-radius: 3px;
 }
 
-/* ── ACHIEVEMENTS ── */
+/* ACHIEVEMENTS */
 .achievements-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -473,7 +473,7 @@ body.light-mode .achiev-item {
   color: var(--muted);
 }
 
-/* RESPONSIVE  */
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .main { margin-left: 0; padding: 72px 20px 40px; }
   .overlay.show { display: block; }

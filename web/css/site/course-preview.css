@@ -1,4 +1,4 @@
-/* ─── COURSE HERO ─── */
+/* COURSE HERO */
 .course-hero {
 	padding: 100px 60px 0;
 	position: relative;
@@ -125,7 +125,7 @@
 	font-weight: 500;
 }
 
-/* ─── COURSE BODY LAYOUT ─── */
+/* COURSE BODY LAYOUT */
 .course-layout {
 	max-width: 1200px;
 	margin: 0 auto;
@@ -137,7 +137,7 @@
 	z-index: 1;
 }
 
-/* ─── LEFT: INFO + MODULES ─── */
+/* LEFT: INFO + MODULES */
 .course-info-section {
 	display: flex;
 	flex-direction: column;
@@ -177,7 +177,7 @@
 	font-weight: 300;
 }
 
-/* ─── WHAT YOU'LL LEARN ─── */
+/* NIMANI O'RGANASIZ QISMI */
 .learn-grid {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
@@ -215,7 +215,7 @@
 	font-weight: 400;
 }
 
-/* ─── MODULES LIST ─── */
+/* MODULES LIST */
 .modules-list {
 	display: flex;
 	flex-direction: column;
@@ -341,7 +341,7 @@
 	white-space: nowrap;
 }
 
-/* ─── RIGHT: STICKY CARD ─── */
+/* RIGHT: STICKY CARD */
 .course-sidebar {
 	position: sticky;
 	top: 90px;
@@ -476,7 +476,7 @@
 	flex-shrink: 0;
 }
 
-/* ─── MENTOR SIDEBAR CARD ─── */
+/* MENTOR SIDEBAR CARD */
 .mentor-sidebar-card {
 	background: var(--surface);
 	border: 1px solid var(--border);
@@ -559,7 +559,7 @@
 	border: 1px solid rgba(255, 107, 53, .3);
 }
 
-/* ─── RESPONSIVE ─── */
+/* RESPONSIVE */
 @media(max-width:1024px) {
 	.course-layout {
 		grid-template-columns: 1fr;

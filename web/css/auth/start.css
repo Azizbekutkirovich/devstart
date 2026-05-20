@@ -1,4 +1,4 @@
-/* ════════ MAIN PAGE ════════ */
+/* MAIN PAGE */
 .start-page {
   min-height: 100vh;
   padding: 100px 20px 80px;
@@ -26,7 +26,7 @@
   max-width: 700px;
 }
 
-/* Course header */
+/* COURSE HEADER */
 .course-header {
   margin-bottom: 36px;
   animation: fadeUp .5s ease both;
@@ -102,7 +102,7 @@
   opacity: .4;
 }
 
-/* Step indicator row */
+/* STEP INDICATOR ROW */
 .steps-indicator {
   display: flex;
   align-items: center;
@@ -201,7 +201,7 @@
   color: var(--accent4);
 }
 
-/* Progress bar */
+/* PROGRESS BAR */
 .progress-bar-wrap {
   background: var(--surface2);
   border-radius: 100px;
@@ -220,7 +220,7 @@
   width: 0%;
 }
 
-/* Step panels */
+/* STEP PANELS */
 .step-panel {
   display: none;
 }
@@ -230,7 +230,6 @@
   animation: fadeUp .4s ease both;
 }
 
-/* Step 1 – Level selection */
 .step-heading {
   font-family: 'Syne', sans-serif;
   font-weight: 700;
@@ -357,7 +356,6 @@
   line-height: 1.4;
 }
 
-/* Step 2 – Try or register */
 .action-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -434,7 +432,7 @@
   line-height: 1.4;
 }
 
-/* Buttons */
+/* BUTTONS */
 .btn-primary {
   padding: 13px 28px;
   background: var(--accent);
@@ -510,7 +508,6 @@
   }
 }
 
-/* RESPONSIVE */
 @media(max-width:600px) {
   .step-nav {
     flex-direction: column;

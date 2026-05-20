@@ -8,11 +8,9 @@ $this->registerCssFile("https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.mi
 $this->registerCssFile(Url::base()."/css/auth/start.css");
 $this->registerCssFile(Url::base()."/css/auth/register.css");
 ?>
-<!-- MAIN -->
 <main class="start-page">
   <div class="start-wrapper">
 
-    <!-- Course Header -->
     <div class="course-header">
       <div class="course-badge">
         <?=$course_name?>
@@ -21,10 +19,8 @@ $this->registerCssFile(Url::base()."/css/auth/register.css");
       <p class="course-desc">Bir necha qadam orqali o'zingizga mos daraja va yo'nalishni tanlang</p>
     </div>
 
-    <!-- Progress Card -->
     <div class="progress-card">
 
-      <!-- Step dots -->
       <div class="steps-indicator">
         <div class="step-dot active" id="dot-1"><span class="step-num">1</span></div>
         <div class="step-connector" id="conn-1"></div>
@@ -35,12 +31,10 @@ $this->registerCssFile(Url::base()."/css/auth/register.css");
         <div class="step-label" id="lbl-2">Boshlash usuli</div>
       </div>
 
-      <!-- Progress bar -->
       <div class="progress-bar-wrap">
         <div class="progress-bar-fill" id="progressBar"></div>
       </div>
 
-      <!-- ── STEP 1 ── -->
       <div class="step-panel active" id="step1">
         <h2 class="step-heading">Kursni qanday darajada o'tilishini xohlaysiz?</h2>
         <p class="step-sub">Bilim darajangizga mos bosqichni belgilang</p>
@@ -68,7 +62,6 @@ $this->registerCssFile(Url::base()."/css/auth/register.css");
         </div>
       </div>
 
-      <!-- ── STEP 2 ── -->
       <div class="step-panel" id="step2">
         <h2 class="step-heading">Qanday boshlashni xohlaysiz?</h2>
         <p class="step-sub">Sinab ko'ring yoki to'liq imkoniyatlardan foydalaning</p>
@@ -106,7 +99,6 @@ $this->registerCssFile(Url::base()."/css/auth/register.css");
   </div>
 </main>
 
-<!-- ════════ REGISTER MODAL ════════ -->
 <?= $this->render("register", ['model' => $model]) ?>
 <script type="text/javascript">
   const urlParams = new URLSearchParams(window.location.search);

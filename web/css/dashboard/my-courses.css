@@ -1,4 +1,4 @@
-/* ── MAIN ── */
+/* MAIN */
 .main {
   margin-left: var(--sidebar-w);
   flex: 1;
@@ -6,7 +6,7 @@
   max-width: 960px;
 }
 
-/* ── SECTION LABEL ── */
+/* SECTION LABEL */
 .section-label {
   font-size: .7rem;
   font-weight: 700;
@@ -16,7 +16,7 @@
   margin-bottom: 14px;
 }
 
-/* ── COURSE HERO ── */
+/* COURSE HERO */
 .course-hero {
   position: relative;
   border-radius: 20px;
@@ -131,7 +131,7 @@ body.light-mode .course-tag {
 .mentor-avatar img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Rasmni cho'zilmasdan divni to'ldirib turishini ta'minlaydi */
+  object-fit: cover;
   display: block;
 }
 
@@ -193,17 +193,17 @@ body.light-mode .overall-progress-label  {
 
 .cp-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, .1); /* Orqa fon rangi */
+  stroke: rgba(255, 255, 255, .1);
   stroke-width: 4;
 }
 
 .cp-fill {
   fill: none;
-  stroke: var(--accent); /* Progress rangi */
+  stroke: var(--accent);
   stroke-width: 4;
-  stroke-linecap: round; /* Chiziq uchini yumaloq qilish */
-  transition: stroke-dashoffset 0.5s ease-in-out; /* O'zgarish animatsiyasi */
-  transform: rotate(-90deg); /* Progress tepadan boshlanishi uchun */
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease-in-out;
+  transform: rotate(-90deg);
   transform-origin: center;
 }
 
@@ -223,7 +223,7 @@ body.light-mode .cp-text {
 }
 
 body.light-mode .cp-bg {
-  stroke: #e6e6e6; /* Orqa fon rangi */
+  stroke: #e6e6e6;
 }
 
 .btn {

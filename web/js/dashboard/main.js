@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-// ── BURGER MENU ──
 const burger = document.getElementById('burger');
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
@@ -28,7 +27,6 @@ overlay.addEventListener('click', () => {
   overlay.classList.remove('show');
 });
 
-// ── THEME SYSTEM ──
 const THEME_KEY = 'dashboard_theme';
 
 function applyTheme(theme) {
@@ -46,5 +44,4 @@ function toggleTheme() {
   applyTheme(next);
 }
 
-// Init on load
-applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+applyTheme(localStorage.getItem(THEME_KEY) || 'light');

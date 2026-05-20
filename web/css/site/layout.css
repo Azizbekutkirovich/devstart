@@ -1,4 +1,4 @@
-/* ════════════════ THEME VARIABLES ════════════════ */
+/* THEME VARIABLES */
 :root {
   --bg: #050810;
   --bg2: #080d18;
@@ -82,7 +82,7 @@ body {
   opacity: .2;
 }
 
-/* ════════════════ NAV ════════════════ */
+/* NAV */
 nav {
   position: fixed;
   top: 0;
@@ -173,7 +173,7 @@ nav {
   box-shadow: 0 0 40px rgba(0, 229, 255, .4);
 }
 
-/* ── Theme Toggle (new icon-button design) ── */
+/* Theme Toggle (yangi tugma) */
 .theme-toggle {
   position: relative;
   width: 44px;
@@ -233,7 +233,7 @@ nav {
   box-shadow: 0 0 16px rgba(245, 158, 11, .2);
 }
 
-/* ── Burger ── */
+/* Burger */
 .nav-burger {
   display: none;
   flex-direction: column;
@@ -277,7 +277,7 @@ nav {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ── Mobile Menu ── */
+/* Mobile Menu */
 .nav-mobile-menu {
   display: none;
   position: fixed;
@@ -344,7 +344,7 @@ nav {
   display: inline-flex;
 }
 
-/* ─── REVEAL ─── */
+/* REVEAL */
 .reveal {
   opacity: 0;
   transform: translateY(24px);
@@ -356,7 +356,7 @@ nav {
   transform: translateY(0);
 }
 
-/* ════════════════ FOOTER ════════════════ */
+/* FOOTER */
 footer {
   position: relative;
   z-index: 1;
@@ -520,7 +520,7 @@ footer {
   color: var(--accent);
 }
 
-/* ════════════════ ANIMATIONS ════════════════ */
+/* ANIMATIONS */
 @keyframes fadeDown {
   from {
     opacity: 0;
@@ -556,7 +556,7 @@ footer {
   transform: translateY(0);
 }
 
-/* ════════════════ RESPONSIVE ════════════════ */
+/* RESPONSIVE */
 @media(max-width:1024px) {
   .footer-inner {
     grid-template-columns: 1fr 1fr;

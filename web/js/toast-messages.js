@@ -1,11 +1,4 @@
-/**
- * Universal toast message function with Toastify JS
- * @param {string} message - Ko'rsatiladigan xabar
- * @param {string} type - 'success', 'error', 'warning', 'info'
- * @param {number} duration - Toast ko'rsatilish vaqti (ms), default 3000
- */
 function showToast(message, type = 'success', duration = 3000) {
-    // Toast konfiguratsiyasi
     const config = {
         success: {
             gradient: 'linear-gradient(135deg, #28a745, #5cd68d)',
@@ -29,10 +22,8 @@ function showToast(message, type = 'success', duration = 3000) {
         }
     };
 
-    // Agar bunday tip bo'lmasa, default success
     const toastConfig = config[type] || config.success;
 
-    // Toast mazmunini formatlash
     const toastHTML = `
         <div style="display: flex; align-items: center; gap: 14px;">
             <div style="font-size: 24px; font-weight: bold;">${toastConfig.icon}</div>
@@ -43,13 +34,12 @@ function showToast(message, type = 'success', duration = 3000) {
         </div>
     `;
 
-    // Toastify ni ko'rsatish
     Toastify({
         text: toastHTML,
         duration: duration,
         gravity: "top",
         position: "right",
-        escapeMarkup: false, // HTML ishlatish uchun
+        escapeMarkup: false,
         stopOnFocus: true,
         style: {
             background: toastConfig.gradient,
@@ -69,12 +59,6 @@ function showToast(message, type = 'success', duration = 3000) {
     }).showToast();
 }
 
-/**
- * Register error handler uchun maxsus funksiya
- * @param {Object} xhr - jQuery AJAX xhr objekti
- * @param {string} status - Status matni
- * @param {string} error - Xatolik matni
- */
 function handleRegisterError(xhr, status, error) {
     let errorMessage = '';
     

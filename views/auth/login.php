@@ -12,16 +12,13 @@
 <main class="login-page">
   <div class="login-container">
     <div class="login-card">
-      <!-- Badge -->
       <div class="login-badge">
         <span class="login-badge-dot"></span>
         // XAVFSIZ LOGIN
       </div>
 
-      <!-- Title -->
       <h1 class="login-title">Devstart<span>ga</span> kirish</h1>
       <p class="login-subtitle">Dasturlash olamiga sayohatingizni davom ettiring</p>
-      <!-- Google -->
       <a href="http://localhost/devstart/auth/google-redirect?operation=login" class="btn-google">
         <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -32,16 +29,15 @@
         Google akkaunt orqali kirish
       </a>
 
-      <!-- Divider -->
       <div class="divider"><span>yoki</span></div>
 
       <?php $form = ActiveForm::begin([
           'id' => 'login-form',
           'fieldConfig' => [
-              'options' => ['class' => 'form-group'], // <div class="form-group">
-              'labelOptions' => ['class' => 'form-label'], // <label class="form-label">
-              'inputOptions' => ['class' => 'form-input'], // <input class="form-input">
-              'errorOptions' => ['tag' => 'div', 'class' => 'text-danger'], // Xatolik xabari uchun
+              'options' => ['class' => 'form-group'],
+              'labelOptions' => ['class' => 'form-label'],
+              'inputOptions' => ['class' => 'form-input'],
+              'errorOptions' => ['tag' => 'div', 'class' => 'text-danger'],
           ],
       ]); ?>
 
@@ -60,7 +56,6 @@
 
       <?php ActiveForm::end(); ?>
 
-      <!-- Register hint -->
       <div class="register-hint">
         <p>Agar ro'yxatdan o'tmagan bo'lsangiz<br><strong>kurslardan birini tanlab ro'yxatdan o'ting</strong></p>
         <a href="<?=Url::to(['site/courses'])?>" class="btn-courses">

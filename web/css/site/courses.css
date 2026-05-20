@@ -1,4 +1,4 @@
-/* ─── PAGE HEADER ─── */
+/* PAGE HEADER */
 .page-header {
 	padding: 130px 60px 60px;
 	position: relative;
@@ -82,7 +82,7 @@
 	font-weight: 300;
 }
 
-/* ─── COURSES MAIN ─── */
+/* COURSES MAIN */
 .courses-main {
 	position: relative;
 	z-index: 1;
@@ -97,7 +97,7 @@
 	gap: 24px;
 }
 
-/* ─── COURSE CARD ─── */
+/* COURSE CARD */
 .course-card {
 	background: var(--surface);
 	border: 1px solid var(--border);
@@ -218,7 +218,7 @@
 	transform: translateY(-1px);
 }
 
-/* ─── EMPTY STATE ─── */
+/* EMPTY STATE */
 .empty-state {
 	grid-column: 1 / -1;
 	text-align: center;
@@ -244,7 +244,7 @@
 	font-size: 0.9rem;
 }
 
-/* ─── RESPONSIVE ─── */
+/* RESPONSIVE */
 @media(max-width:900px) {
 	.page-header {
 		padding: 110px 24px 50px;

@@ -1,10 +1,10 @@
-/* ════════ ABOUT PAGE ════════ */
+/* ABOUT PAGE */
 .about-page {
   position: relative;
   z-index: 1;
 }
 
-/* Hero */
+/* HERO */
 .about-hero {
   padding: 140px 60px 80px;
   max-width: 1200px;
@@ -101,7 +101,7 @@
   animation: fadeUp .55s .12s ease both;
 }
 
-/* Stat row */
+/* STAT ROW */
 .stats-row {
   display: flex;
   gap: 40px;
@@ -135,7 +135,7 @@
   letter-spacing: .05em;
 }
 
-/* Section */
+/* SECTION */
 .section {
   max-width: 1200px;
   margin: 0 auto;
@@ -174,7 +174,7 @@
   margin-bottom: 44px;
 }
 
-/* Divider */
+/* DIVIDER */
 .section-divider {
   height: 1px;
   background: var(--border);
@@ -182,7 +182,7 @@
   margin: 0 auto 80px;
 }
 
-/* Mission cards */
+/* MISSION CARDS */
 .mission-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -252,14 +252,13 @@
   line-height: 1.65;
 }
 
-/* Team Section */
+/* TEAM SECTION */
 .team-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 22px;
 }
 
-/* Founder card — special */
 .founder-card {
   grid-column: 1 / -1;
   display: grid;
@@ -453,7 +452,6 @@
   letter-spacing: .04em;
 }
 
-/* Team member cards */
 .member-card {
   padding: 26px 22px;
   border-radius: 16px;
@@ -508,7 +506,6 @@
   line-height: 1.6;
 }
 
-/* Values section */
 .values-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -557,7 +554,7 @@
   line-height: 1.6;
 }
 
-/* CTA banner */
+/* CTA BANNER */
 .cta-banner {
   max-width: 1200px;
   margin: 0 auto 80px;

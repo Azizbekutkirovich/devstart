@@ -1,4 +1,4 @@
-/* ── MAIN CHAT AREA ── */
+/* MAIN CHAT AREA */
 .main {
   margin-left: var(--sidebar-w);
   flex: 1;
@@ -8,7 +8,7 @@
   overflow: hidden;
 }
 
-/* ── CHAT TOPBAR ── */
+/* CHAT TOPBAR */
 .chat-topbar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -73,7 +73,7 @@ body.light-mode .topic-chip-name {
   border-color: var(--accent);
 }
 
-/* ── CHAT SCROLL AREA ── */
+/* CHAT SCROLL AREA */
 #chat {
   flex: 1;
   overflow-y: auto;
@@ -97,7 +97,7 @@ body.light-mode .topic-chip-name {
   border-radius: 3px;
 }
 
-/* ── MESSAGES ── */
+/* MESSAGES */
 .message {
   max-width: 780px;
   border-radius: 16px;
@@ -137,7 +137,6 @@ body.light-mode .topic-chip-name {
   white-space: pre-wrap;
 }
 
-/* Markdown content inside bot messages */
 .message.bot h1 {
   font-family: 'Outfit', sans-serif;
   font-size: 1.25rem;
@@ -219,7 +218,7 @@ body.light-mode .message.bot h2 {
   line-height: 1.6;
 }
 
-/* ── HISTORY NOTICE ── */
+/* HISTORY NOTICE */
 .history-notice {
   background: rgba(94, 234, 212, .06);
   border: 1px solid rgba(94, 234, 212, .2);
@@ -235,7 +234,7 @@ body.light-mode .message.bot h2 {
   color: var(--accent);
 }
 
-/* ── CENTER BUTTON ── */
+/* CENTER BUTTON */
 .center-btn {
   display: flex;
   justify-content: center;
@@ -269,7 +268,7 @@ body.light-mode .message.bot h2 {
   transform: none;
 }
 
-/* ── QUIZ ── */
+/* QUIZ */
 .quiz-container {
   background: var(--card);
   border: 1px solid var(--border);
@@ -376,7 +375,7 @@ body.light-mode .question-block {
   color: #fbbf24;
 }
 
-/* ── PRACTICE INPUTS ── */
+/* PRACTICE INPUTS */
 #practice-inputs {
   display: flex;
   flex-direction: column;
@@ -408,7 +407,7 @@ body.light-mode .question-block {
   font-family: 'DM Sans', sans-serif;
 }
 
-/* ── LOADER ── */
+/* LOADER */
 .loader-container {
   display: flex;
   flex-direction: column;
@@ -428,11 +427,9 @@ body.light-mode .question-block {
   width: 100px;
   height: auto;
   z-index: 2;
-  /* Suzuvchi animatsiya */
   animation: float 2s ease-in-out infinite;
 }
 
-/* Pulsatsiya effekti (orqadagi halqa) */
 .pulse-ring {
   position: absolute;
   width: 50px;
@@ -452,7 +449,6 @@ body.light-mode .question-block {
   100% { transform: scale(2); opacity: 0; }
 }
 
-/* Nuqtalar animatsiyasi */
 .dots {
   display: inline-block;
   width: 1em;
@@ -466,7 +462,7 @@ body.light-mode .question-block {
   66% { content: "..."; }
 }
 
-/* ── CHAT INPUT ── */
+/* CHAT INPUT */
 .chat-input-wrap {
   background: var(--surface);
   border-top: 1px solid var(--border);
@@ -529,13 +525,12 @@ body.light-mode .question-block {
   transform: none;
 }
 
-/* copy button */
 .copy-code-button {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
   padding: 4px 8px;
-  background-color: rgba(255, 255, 255, 0.1); /* Shaffof fon */
+  background-color: rgba(255, 255, 255, 0.1);
   color: #e0e0e0;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
@@ -543,23 +538,22 @@ body.light-mode .question-block {
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 10;
-  backdrop-filter: blur(4px); /* Orqa fonni bir oz xiralashtirish */
+  backdrop-filter: blur(4px);
 }
 
 .copy-code-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  border-color: #3b82f6; /* Moviyroq chegara */
+  border-color: #3b82f6;
 }
 
 .copy-code-button:active {
-  transform: scale(0.95); /* Bosilganda kichrayish effekti */
+  transform: scale(0.95);
 }
 
-/* Kod bloki uchun ota konteyner */
 pre {
-  position: relative; /* Button joylashishi uchun muhim */
-  padding-top: 2rem !important; /* Button matnni yopib qo'ymasligi uchun */
+  position: relative;
+  padding-top: 2rem !important;
 }
 
 /* RESPONSIVE */

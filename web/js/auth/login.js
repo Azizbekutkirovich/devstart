@@ -1,4 +1,3 @@
-// Password toggle
 function togglePwd() {
   const inp = document.getElementById('passwordInput');
   const icon = document.getElementById('eyeIcon');

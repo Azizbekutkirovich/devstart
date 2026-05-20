@@ -3,7 +3,6 @@
   $this->title = "Bosh sahifa";
   $this->registerCssFile(Url::base()."/css/site/main.css");
 ?>
-<!-- ═══════════ HERO ═══════════ -->
 <section class="hero" id="home">
   <div class="hero-orb orb-1"></div>
   <div class="hero-orb orb-2"></div>
@@ -25,7 +24,6 @@
   </div>
 </section>
 
-<!-- ═══════════ HOW IT WORKS ═══════════ -->
 <section class="how-section" id="how">
   <div class="section-inner">
     <div class="section-tag">Jarayon</div>
@@ -59,7 +57,6 @@
 
 <div class="divider"></div>
 
-<!-- ═══════════ AI MENTORS ═══════════ -->
 <section id="mentors">
   <div class="section-inner">
     <div class="section-tag">Mentorlar</div>
@@ -95,7 +92,6 @@
 
 <div class="divider"></div>
 
-<!-- ═══════════ COURSES ═══════════ -->
 <section class="courses-section" id="courses">
   <div class="section-inner">
     <div class="section-tag">Ta'lim dasturi</div>

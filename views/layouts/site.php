@@ -21,7 +21,6 @@ SiteAsset::register($this);
 <?php $this->beginBody() ?>
 <div class="grid-bg"></div>
 
-<!-- ═══════════ NAV ═══════════ -->
 <nav id="mainNav">
   <a href="<?=Url::to(['site/main'])?>" class="nav-logo">
     <img src="<?=Url::base()?>/images/icons/devstart-logo.png" class="navbar-logo"> 
@@ -49,7 +48,6 @@ SiteAsset::register($this);
   </div>
 </nav>
 
-<!-- ── Mobile Menu ── -->
 <div class="nav-mobile-menu" id="navMobileMenu" role="navigation" aria-label="Mobil menyu">
   <ul>
     <li><a href="<?=Url::to(['site/main'])?>">Bosh sahifa</a></li>
@@ -64,7 +62,6 @@ SiteAsset::register($this);
   </div>
 </div>
 <?=$content?>
-<!-- ═══════════ FOOTER ═══════════ -->
 <footer>
   <div class="footer-inner">
     <div class="footer-brand">

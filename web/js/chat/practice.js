@@ -1,12 +1,5 @@
-// ═══════════════════════════════════════════
-//  practice.js — Amaliy topshiriqlar
-// ═══════════════════════════════════════════
-// Bog'liqlik: helpers.js, flowManager.js
-
-// Resume bo'lsa practices tiklanadi
 let practices = window.__RESUME__?.practices || '';
 
-// ── Amaliy topshiriqlarni yuklash ─────────────
 async function startPractice() {
   const messageDiv = createBotMessageContainer();
   const loader     = showLoader(chat);
@@ -29,7 +22,6 @@ async function startPractice() {
   }
 }
 
-// ── Javoblarni tekshirish ─────────────────────
 async function checkPracticeTask() {
   const answers = [];
   let i = 1;
@@ -58,7 +50,6 @@ async function checkPracticeTask() {
   }
 }
 
-// ── Javob input-larini yaratish ───────────────
 function appendPracticeInputs() {
   document.getElementById('practice-inputs')?.remove();
   const container = document.createElement('div');
@@ -73,7 +64,6 @@ function appendPracticeInputs() {
   chat.appendChild(container);
 }
 
-// ── So'rov yig'uvchi ──────────────────────────
 function _buildPracticeRequest(extra = {}) {
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   const urlParams = new URLSearchParams(window.location.search);
@@ -96,9 +86,6 @@ function _buildPracticeRequest(extra = {}) {
   };
 }
 
-// ── Restore uchun public funksiya ─────────────
-// restorer.js tomonidan chaqiriladi:
-// practice content bor lekin javob yuborilmagan holat
 function restorePracticeInputs() {
   appendPracticeInputs();
   createButton('Topshiriqlarni yuborish', 'validateTask');

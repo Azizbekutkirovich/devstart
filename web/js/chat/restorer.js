@@ -1,19 +1,3 @@
-// ═══════════════════════════════════════════
-//  restorer.js — Chat tarixini tiklash
-//
-//  History item turlari (backend yuboradi):
-//    bot_topic           — mavzu qismi (markdown)
-//    user_message        — foydalanuvchi xabari
-//    quiz                — savollar + natijalar
-//    bot_practice        — amaliy topshiriq matni
-//    bot_practice_result — tekshiruv natijasi
-//    bot_message         — boshqa mentor xabarlari
-//
-//  Backend __RESUME__ da faqat bitta extra field yuboradi:
-//    topic_completed: true | false
-// ═══════════════════════════════════════════
-
-// ── Bosh tiklovchi ───────────────────────────
 function restoreChat(history) {
   if (!Array.isArray(history) || history.length === 0) return;
 
@@ -30,10 +14,6 @@ function restoreChat(history) {
   });
 }
 
-// ════════════════════════════════════════════
-//  inferStepFromHistory
-// ════════════════════════════════════════════
-// restorer.js
 function inferStepFromHistory(history) {
   const FALLBACK = { step: 0, continueTopic: false, practiceInputs: false, isPending: false };
   if (!Array.isArray(history) || history.length === 0) return FALLBACK;
@@ -44,45 +24,34 @@ function inferStepFromHistory(history) {
   const hasPractice        = types.includes('bot_practice');
   const hasPracticeResult  = types.includes('bot_practice_result');
 
-  // 1. Practice natijasi bor -> Hammasi tugagan, step: 3 (end)
   if (hasPracticeResult) {
     return { step: 3, continueTopic: false, practiceInputs: false, isPending: false };
   }
 
-  // 2. Practice bor lekin natija yo'q -> Step: 2 (practice) va kutish rejimida
   if (hasPractice) {
     return { step: 2, continueTopic: false, practiceInputs: true, isPending: true };
   }
 
-  // 3. Quiz bor
   if (hasQuiz) {
     const quizItem = history.find((h) => h.type === 'quiz');
     const quizDone = quizItem?.data?.results?.length > 0;
     
     if (quizDone) {
-        // Quiz tugagan -> Step: 2 (practice) tugmasi chiqishi kerak
         return { step: 2, continueTopic: false, practiceInputs: false, isPending: false };
     }
-    // Quiz tugallanmagan -> Step: 1 (quiz) va kutish rejimida
     return { step: 1, continueTopic: false, practiceInputs: false, isPending: true };
   }
 
-  // 4. Topic bor
   if (hasTopicParts) {
     const topicCompleted = window.__RESUME__?.topic_completed ?? true;
     if (topicCompleted) {
-        // Topic tugagan -> Step: 1 (quiz) tugmasi chiqishi kerak
         return { step: 1, continueTopic: false, practiceInputs: false, isPending: false };
     }
-    // Topic davom etmoqda -> Step: 0 (topic) va kutish rejimida
     return { step: 0, continueTopic: true, practiceInputs: false, isPending: true };
   }
 
   return FALLBACK;
 }
-
-
-// ── Alohida tiklovchilar ─────────────────────
 
 function restoreUserMessage(text) {
   const div = document.createElement('div');
@@ -114,11 +83,10 @@ function restoreQuiz(data) {
     document.getElementById('finishTest')?.remove();
     applyTestResults(parsed, document.querySelector('.quiz-container'));
   }
-  // results yo'q → "Testni yakunlash" tugmasi DOM da qoladi
 }
 
 function restorePracticeContent(rawContent) {
-  practices = rawContent; // practice.js global — checkPracticeTask() uchun kerak
+  practices = rawContent;
 
   const div = createBotMessageContainer();
   div.classList.add('bot');

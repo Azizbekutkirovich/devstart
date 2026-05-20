@@ -3,7 +3,6 @@
   $this->title = "Kurs";
   $this->registerCssFile(Url::base()."/css/site/course-preview.css");
 ?>
-<!-- ═══════════ COURSE HERO ═══════════ -->
 <div class="course-hero">
   <div class="course-hero-bg">
     <img src="" alt="" onerror="this.style.display='none'">
@@ -22,13 +21,10 @@
   </div>
 </div>
 
-<!-- ═══════════ MAIN CONTENT ═══════════ -->
 <div class="course-layout">
 
-  <!-- LEFT COLUMN -->
   <div class="course-info-section">
 
-    <!-- About -->
     <div class="info-block reveal">
       <div class="info-block-title">Kurs haqida</div>
       <p class="course-about-text">
@@ -36,7 +32,6 @@
       </p>
     </div>
 
-    <!-- What you'll learn -->
     <?php
       $learn_features = json_decode($course['learn_features'], true);
     ?>
@@ -52,7 +47,6 @@
       </div>
     </div>
 
-    <!-- Modules -->
     <div class="info-block reveal">
       <div class="info-block-title">Kurs dasturi</div>
       <div class="modules-list">
@@ -84,7 +78,6 @@
 
   </div>
 
-  <!-- RIGHT COLUMN: SIDEBAR -->
   <div class="course-sidebar">
 
     <div class="sidebar-card reveal">

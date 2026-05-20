@@ -1,9 +1,3 @@
-// ═══════════════════════════════════════════
-//  chat.js — Savol berish va navigatsiya
-// ═══════════════════════════════════════════
-// Bog'liqlik: helpers.js, topic.js (isTyping, typeText)
-
-// ── "Keyingi bosqich" tugmasini boshqarish ───
 let _lastRemovedNextBtn = null;
 
 function _getLastNextStepButton() {
@@ -11,8 +5,6 @@ function _getLastNextStepButton() {
   return all[all.length - 1] || null;
 }
 
-// Foydalanuvchi savol berganda yashirilmasligi kerak bo'lgan tugmalar:
-// flow tugmalari (flow-btn-*) yashiriladi, forma submit tugmalari saqlanadi.
 const PINNED_BUTTONS = ['finishTest', 'validateTask'];
 
 function removeLastNextStepButton() {
@@ -32,7 +24,6 @@ function restoreLastRemovedNextStepButton() {
   scrollToBottom();
 }
 
-// ── Savolga javob berish ─────────────────────
 async function askQuestionAboutTopic(userQuestion) {
   const messageDiv = createBotMessageContainer();
   const loader = showLoader(chat);
@@ -75,7 +66,6 @@ async function askQuestionAboutTopic(userQuestion) {
   }
 }
 
-// ── Foydalanuvchi savol yuborishi ─────────────
 function askQuestion() {
   if (isTyping) return;
   const text = userInput.value.trim();

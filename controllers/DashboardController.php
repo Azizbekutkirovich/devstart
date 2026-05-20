@@ -13,9 +13,7 @@ use app\models\Levels;
 class DashboardController extends Controller
 {
     public $layout = "dashboard";
-    /**
-     * {@inheritdoc}
-     */
+    
     public function behaviors()
     {
         return [
@@ -38,9 +36,6 @@ class DashboardController extends Controller
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function actions()
     {
         return [
@@ -60,11 +55,6 @@ class DashboardController extends Controller
 
     //user actions:
     
-    /**
-     * Tizimga kirgan foydalanuvchilar uchun home sahifasi
-     *
-     * @return string
-     */
     public function actionHome()
     {
         $user = Yii::$app->user->identity;
@@ -211,11 +201,6 @@ class DashboardController extends Controller
 
     //guest actions:
     
-    /**
-     * Mehmon foydalanuvchilar uchun home sahifasi
-     *
-     * @return string
-     */
     public function actionHomePreview(int $course_id, int $level_id) {
         if (!$this->validateGuest($course_id, $level_id)) return $this->goBack();
         $data = Courses::find()
@@ -338,15 +323,11 @@ class DashboardController extends Controller
         return true;
     }
 
-    /**
-     * 1. Topic progressini hisoblash
-     */
     private function calculateTopicProgress($topic, $userDataId)
     {
         $chats = is_array($topic) ? ($topic['chats'] ?? []) : ($topic->chats ?? []);
         
         foreach ($chats as $chat) {
-            // Faqat kerakli user_data_id ga tegishli chatni olamiz
             if ($chat['user_data_id'] == $userDataId) {
                 if ($chat['total_stages'] > 0) {
                     return ($chat['current_stage'] / $chat['total_stages']) * 100;
@@ -356,9 +337,6 @@ class DashboardController extends Controller
         return 0;
     }
 
-    /**
-     * 2. Modul progressini hisoblash
-     */
     private function calculateModuleProgress($module, $userDataId)
     {
         $topics = is_array($module) ? ($module['topics'] ?? []) : ($module->topics ?? []);
@@ -374,9 +352,6 @@ class DashboardController extends Controller
         return $totalProgress / $topicsCount;
     }
 
-    /**
-     * 3. Kurs progressini hisoblash
-     */
     private function calculateCourseProgress($course, $userDataId)
     {
         $modules = is_array($course) ? ($course['modules'] ?? []) : ($course->modules ?? []);

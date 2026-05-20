@@ -10,9 +10,7 @@ use app\models\Courses;
 class SiteController extends Controller
 {
     public $layout = "site";
-    /**
-     * {@inheritdoc}
-     */
+    
     public function actions()
     {
         return [

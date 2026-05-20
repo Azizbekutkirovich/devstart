@@ -23,11 +23,9 @@ $this->registerCssFile(Url::base()."/css/auth/start-user.css");
 	]
 */
 ?>
-<!-- MAIN -->
 <main class="start-page">
   <div class="start-wrapper">
 
-    <!-- Course Header -->
     <div class="course-header">
       <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;">
         <div class="course-badge">
@@ -42,10 +40,8 @@ $this->registerCssFile(Url::base()."/css/auth/start-user.css");
       <p class="course-desc">Bilim darajangizga mos bosqichni belgilang va kursni boshlang</p>
     </div>
 
-    <!-- Progress Card -->
     <div class="progress-card">
 
-      <!-- Single step indicator -->
       <div class="single-step-indicator" id="stepIndicator">
         <div class="single-step-dot" id="stepDot">1</div>
         <div class="single-step-info">
@@ -55,12 +51,10 @@ $this->registerCssFile(Url::base()."/css/auth/start-user.css");
         <svg id="stepCheckIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent4)" stroke-width="2.5" style="display:none;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
 
-      <!-- Progress bar -->
       <div class="progress-bar-wrap">
         <div class="progress-bar-fill" id="progressBar"></div>
       </div>
 
-      <!-- ── STEP 1 (only step) ── -->
       <div class="step-panel active" id="step1">
         <h2 class="step-heading">Kursni qanday darajada o'tilishini xohlaysiz?</h2>
         <p class="step-sub">Bilim darajangizga mos bosqichni belgilang</p>

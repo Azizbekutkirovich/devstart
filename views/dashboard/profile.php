@@ -21,7 +21,6 @@
   </div>
 
   <div class="profile-grid">
-    <!-- USER INFO -->
     <div class="pcard full">
       <div class="card-head">
         <div class="card-title">
@@ -66,7 +65,6 @@
   </div>
 <?php else: ?>
   <div class="profile-grid">
-    <!-- USER INFO -->
     <div class="pcard full">
 
       <div class="profile-identity">

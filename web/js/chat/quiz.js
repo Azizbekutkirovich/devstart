@@ -1,11 +1,5 @@
-// ═══════════════════════════════════════════
-//  quiz.js — Test topshiriqlari
-// ═══════════════════════════════════════════
-// Bog'liqlik: helpers.js, flowManager.js
-
 let quizData = [];
 
-// ── Testni boshlash ──────────────────────────
 function startTest() {
   const loader    = showLoader(chat);
   const urlParams = new URLSearchParams(window.location.search);
@@ -45,7 +39,6 @@ function startTest() {
   });
 }
 
-// ── Test UI ──────────────────────────────────
 function showQuiz() {
   const quizDiv = document.createElement('div');
   quizDiv.className = 'quiz-container';
@@ -87,7 +80,6 @@ function showQuiz() {
   chat.appendChild(quizDiv);
 }
 
-// ── Variant tanlash ──────────────────────────
 function selectTestOption(option) {
   const qIndex = option.dataset.q;
   option.closest('.quiz-container')
@@ -97,7 +89,6 @@ function selectTestOption(option) {
   option.setAttribute('data-selected', 'true');
 }
 
-// ── Testni tekshirish ────────────────────────
 function checkingTest() {
   const quizDiv = document.querySelector('.quiz-container');
   const selectedAnswers = {};
@@ -138,7 +129,6 @@ function checkingTest() {
   });
 }
 
-// ── Natijalarni ko'rsatish (PUBLIC — restorer ishlatadi) ─
 function applyTestResults(results, quizDiv) {
   quizDiv.querySelectorAll('.question-block').forEach((block, i) => {
     const res = results[i];
@@ -169,7 +159,6 @@ function applyTestResults(results, quizDiv) {
   });
 }
 
-// ── Private ──────────────────────────────────
 function _parseQuizData(data) {
   return data.map((q) => ({
     question: marked.parse(q.question),

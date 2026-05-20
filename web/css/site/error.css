@@ -1,6 +1,5 @@
-/* Error sahifasi uchun maxsus minimal stillar */
 .error-wrapper {
-    min-height: calc(100vh - 140px); /* Nav va footer orasidagi masofa */
+    min-height: calc(100vh - 140px);
     display: flex;
     align-items: center;
     justify-content: center;

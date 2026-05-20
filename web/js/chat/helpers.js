@@ -1,12 +1,7 @@
-// ═══════════════════════════════════════════
-//  helpers.js — Umumiy yordamchi funksiyalar
-// ═══════════════════════════════════════════
-
 const chat        = document.getElementById('chat');
 const chatInput   = document.getElementById('chatInput');
 const userInput   = document.getElementById('userInput');
 
-// ── Auto-grow textarea ──────────────────────
 document.addEventListener('input', function (e) {
   if (!e.target.classList.contains('auto-grow')) return;
   const el = e.target;
@@ -14,7 +9,6 @@ document.addEventListener('input', function (e) {
   el.style.height = Math.min(el.scrollHeight, 140) + 'px';
 });
 
-// ── Chat DOM yordamchilari ──────────────────
 function scrollToBottom() {
   chat.scrollTop = chat.scrollHeight;
 }
@@ -52,7 +46,6 @@ function createButton(text, id) {
   chat.appendChild(btnDiv);
 }
 
-// ── Loader ──────────────────────────────────
 function showLoader(container) {
   const div = document.createElement('div');
   div.className = 'loader-wrapper';
@@ -73,7 +66,6 @@ function hideLoader(loaderDiv) {
   loaderDiv?.remove();
 }
 
-// ── Kod highlight ───────────────────────────
 function applyHighlighting(container) {
   if (typeof hljs === 'undefined') return;
   container.querySelectorAll('pre code').forEach((block) => {
@@ -84,7 +76,6 @@ function applyHighlighting(container) {
   });
 }
 
-// ── Copy tugmalari ──────────────────────────
 function addCopyButtons(root = document) {
   root.querySelectorAll('pre:not(.copy-added)').forEach((pre) => {
     pre.classList.add('copy-added');
@@ -110,17 +101,7 @@ const copyObserver = new MutationObserver((mutations) => {
 });
 copyObserver.observe(document.body, { childList: true, subtree: true });
 
-// ── SSE Streaming ───────────────────────────
-/**
- * SSE stream o'qib, har chunk da onChunk chaqiradi.
- *
- * Terminator signallari:
- *   [DONE]      — guest rejimi, kontent tugadi
- *   [DONE:more] — user rejimi, yana qism bor
- *   [DONE:end]  — user rejimi, mavzu tugadi
- *
- * @returns {Promise<{ content: string, hasMore: boolean }>}
- */
+
 async function fetchWithStreaming(url, options, onChunk) {
   const response = await fetch(url, options);
 
@@ -164,19 +145,6 @@ async function fetchWithStreaming(url, options, onChunk) {
   return { content: fullContent, hasMore: false };
 }
 
-// ── Standart streaming renderer (typing effekt) ─
-/**
- * Loader yashiradi va typeText kabi belma-bel chiqaradi.
- *
- * Ishlash tamoyili:
- *   - Kelgan chunklar "pendingContent" buferiga yig'iladi
- *   - Interval "typedIndex" ni bittadan oshirib buferdan o'qiydi
- *   - Stream tezligi va typing tezligi bir-biridan mustaqil
- *
- * @returns {{ onChunk, flush }}
- *   onChunk — fetchWithStreaming ga beriladi
- *   flush   — stream tugagach callback bilan chaqiriladi
- */
 function makeStreamingRenderer(messageDiv, loader) {
   let pendingContent = '';
   let typedIndex     = 0;
@@ -185,7 +153,7 @@ function makeStreamingRenderer(messageDiv, loader) {
   let onDone         = null;
 
   function _tick() {
-    if (typedIndex >= pendingContent.length) return; // chunk hali kelmagan — kutamiz
+    if (typedIndex >= pendingContent.length) return;
 
     typedIndex++;
     messageDiv.innerHTML = `<span><img src="${botAvatar}" alt="Robot" style="width: 70px; height: auto; z-index: 2;">
@@ -208,13 +176,9 @@ function makeStreamingRenderer(messageDiv, loader) {
       intervalId   = setInterval(_tick, 2);
       isFirstChunk = false;
     }
-    pendingContent = allContent; // interval o'zi davom ettiradi
+    pendingContent = allContent;
   }
 
-  /**
-   * Stream tugagach chaqiriladi.
-   * Typing hali davom etayotgan bo'lsa — tugagach callback ishga tushadi.
-   */
   function flush(callback) {
     onDone = callback || null;
     if (typedIndex >= pendingContent.length) _finish();
@@ -224,28 +188,22 @@ function makeStreamingRenderer(messageDiv, loader) {
 }
 
 function nextTopic() {
-  // 1. Joriy URL'ni olish
   const currentUrl = new URL(window.location.href);
 
-  // 2. URL'dagi parametrlarni olish (masalan: ?topic_id=5)
   const searchParams = currentUrl.searchParams;
   let topicId = searchParams.get('topic_id');
 
   if (topicId) {
-      // 3. topic_id ni songa o'tkazish va 1 qo'shish
       let nextTopicId = parseInt(topicId) + 1;
 
-      // 4. Yangi qiymatni parametrlarga o'rnatish
       searchParams.set('topic_id', nextTopicId);
 
-      // 5. Yangi shakllangan URL ga yo'naltirish
       window.location.href = currentUrl.pathname + '?' + searchParams.toString();
   } else {
       console.error("URL'da topic_id topilmadi.");
   }
 }
 
-// ── Marked & hljs init ───────────────────────
 marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
 hljs.highlightAll();
 addCopyButtons();

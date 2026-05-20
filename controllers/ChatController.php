@@ -15,22 +15,9 @@ use app\models\Messages;
 use app\services\GeminiApiService;
 use app\services\PromptService;
 
-/**
- * ChatController
- *
- * Har bir action ikki rejimda ishlaydi:
- *  - Guest : level_id request body'dan olinadi, natija saqlanmaydi.
- *  - User  : level_id session'dan olinadi, natija DB'ga saqlanadi (TODO).
- *
- * Kelajakdagi DB integratsiyasi uchun har bir actionda
- * `handleUser*()` va `handleGuest*()` juftligi mavjud.
- */
 class ChatController extends Controller
 {
     public $layout = "dashboard";
-    // =========================================================================
-    // Behaviors
-    // =========================================================================
 
     public function behaviors(): array
     {
@@ -45,10 +32,6 @@ class ChatController extends Controller
             ],
         ];
     }
-
-    // =========================================================================
-    // Actions — Streaming (SSE)
-    // =========================================================================
 
     public function actionGenerateTopic(): void
     {
@@ -158,10 +141,6 @@ class ChatController extends Controller
         }
     }
 
-    // =========================================================================
-    // Actions — JSON
-    // =========================================================================
-
     public function actionGenerateQuizTest()
     {
         $this->requireAjax();
@@ -209,13 +188,6 @@ class ChatController extends Controller
         }
     }
 
-    // =========================================================================
-    // Actions — Pages
-    // =========================================================================
-
-    /**
-     * Tizimga kirgan foydalanuvchilar uchun chat sahifasi.
-     */
     public function actionChat(int $topic_id) 
     {
         $course = Courses::findOne(Yii::$app->user->identity->activeData['course_id']);
@@ -248,10 +220,6 @@ class ChatController extends Controller
                 }
             }
         }
-        // echo '<pre>';
-        //     print_r($messages);
-        // echo '</pre>';
-        // die;
 
         if (!$topic) {
             return $this->goBack();
@@ -268,10 +236,6 @@ class ChatController extends Controller
         ]);        
     }
 
-
-    /**
-     * Mehmon foydalanuvchilar uchun chat sahifasi.
-     */
     public function actionChatPreview(int $course_id, int $topic_id, int $level_id)
     {
         $levelExists = Levels::find()->where(['id' => $level_id])->exists();
@@ -308,13 +272,6 @@ class ChatController extends Controller
             'mentor_avatar' => $course->mentor->chat_img
         ]);
     }
-
-    // =========================================================================
-    // Guest handlers
-    //
-    // Faqat AI dan javob olib streamlaydi yoki JSON qaytaradi.
-    // DB bilan ishi yo'q.
-    // =========================================================================
 
     private function handleGuestGenerateTopic(string $prompt): void
     {
@@ -381,50 +338,26 @@ class ChatController extends Controller
         ]);
     }
 
-    // =========================================================================
-    // User handlers
-    //
-    // TODO: Har bir handler'da DB saqlash logikasini qo'shish kerak.
-    //
-    // Yozilishi kerak bo'lgan modellar (taxminiy):
-    //   - UserLesson        : foydalanuvchi ko'rgan darslar
-    //   - UserPractice      : bajarilgan amaliyotlar va baholar
-    //   - UserQuestion      : berilgan savollar va javoblar
-    //   - UserQuizResult    : test natijalari (to'g'ri/noto'g'ri/javobsiz)
-    //
-    // Har bir handler'dagi "TODO" kommentlarini o'sha model tayyor bo'lganda
-    // almashtirib chiqish kifoya.
-    // =========================================================================
-
     private function handleUserGenerateTopic(string $prompt, array $topic): void
     {
-        // streamFirstPartOnly:
-        //   - frontga faqat 1-qism ([NEXT] gacha) uzatadi
-        //   - to'liq contentni qaytaradi
         $fullContent = $this->streamFirstPartOnly($prompt);
 
         if ($fullContent === null) {
-            // streamFirstPartOnly ichida xato yuz berdi, javob allaqachon yuborilgan
             return;
         }
 
-        // ── Qismlarni ajratish ─────────────────────────────────────────────────
-        $parts      = explode('[NEXT]', $fullContent);  // [part0, part1, ...]
-        $totalParts = count($parts);                     // [NEXT] soni + 1
+        $parts      = explode('[NEXT]', $fullContent);
+        $totalParts = count($parts);
 
-        // ── Chat topish / yaratish ─────────────────────────────────────────────
         $chatId = $this->resolveChat($topic['id'])['id'];
         if (!$chatId) exit();
 
-        // ── total_stages hisoblash, chats yangilash ────────────────────────────
         $topicType   = $topic['type'] ?? 'theory';
         $totalStages = $this->calculateTotalStages($topicType, $totalParts);
 
-        // Tranzaksiyani boshlash
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-            // 1. Chats jadvalini yangilash
             $updatedRows = Chats::updateAll(
                 [
                     'total_stages'  => $totalStages,
@@ -433,7 +366,6 @@ class ChatController extends Controller
                 ['id' => $chatId]
             );
 
-            // 2. MasterLessons modelini saqlash
             $masterLesson               = new MasterLessons();
             $masterLesson->chat_id      = $chatId;
             $masterLesson->full_content = $fullContent;
@@ -443,7 +375,6 @@ class ChatController extends Controller
                 throw new \Exception("MasterLesson_SAVE_ERROR");
             }
 
-            // 3. Messages: system + 1-qism saqlash
             $firstPartText = trim($parts[0]);
 
             $systemMsg = Messages::create($chatId, 'system', 'text', ['text' => 'Darsni boshlash']);
@@ -453,14 +384,11 @@ class ChatController extends Controller
                 throw new \Exception("Messages_SAVE_ERROR");
             }
 
-            // Agar hamma narsa muvaffaqiyatli bo'lsa, bazaga saqlaymiz
             $transaction->commit();
 
         } catch (\Exception $e) {
-            // Xatolik bo'lsa, barcha amallarni bekor qilamiz (Rollback)
             $transaction->rollBack();
             
-            // Xatoni logga yozish yoki foydalanuvchiga ko'rsatish
             Yii::error("Xatolik: handleUserGenerateTopicda: chat_id={$chatId}, xatolik xabari: {$e->getMessage()}");
 
             $this->sendStreamError("Xatolik yuz berdi! Iltimos sahifani qayta yuklang");
@@ -470,18 +398,11 @@ class ChatController extends Controller
         Yii::$app->end();
     }
 
-    /**
-     * Mavzuning keyingi qismini frontga uzatadi.
-     *
-     * @param int   $chatId   Joriy chat ID
-     * @param array $topic    Topic ma'lumotlari (kamida ['id'])
-    */
     public function actionContinueTopic(): void
     {
         $this->requireAjax();
         $body  = Yii::$app->request->getBodyParams();
         $chatId = $this->resolveChat((int) ($body['topic_id'] ?? 0))['id'];   
-        // ── Oxirgi mentor xabarining step_topic_index ini topamiz ─────────────
         $lastMentorMessage = Messages::find()
             ->select(['id', 'step_topic_index'])
             ->where([
@@ -501,7 +422,6 @@ class ChatController extends Controller
         $currentIndex = (int) $lastMentorMessage['step_topic_index'];
         $nextIndex    = $currentIndex + 1;
 
-        // ── master_lessons dan ma'lumot olish ─────────────────────────────────
         $masterLesson = MasterLessons::find()
             ->where(['chat_id' => $chatId])
             ->one();
@@ -523,23 +443,19 @@ class ChatController extends Controller
 
         $nextPartText = trim($parts[$nextIndex]);
 
-        // Tranzaksiyani boshlash
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-            // 1. System xabari: "Davom etish"
             $systemMsg = Messages::create($chatId, 'system', 'command', ['text' => 'Davom etish']);
             if (!$systemMsg) {
                 throw new \Exception("System xabari saqlanmadi: chat_id={$chatId}");
             }
 
-            // 2. Mentor xabarini saqlash
             $mentorMsg = Messages::create($chatId, 'mentor', 'topic', ['text' => $nextPartText], $nextIndex);
             if (!$mentorMsg) {
                 throw new \Exception("Mentor xabari saqlanmadi: chat_id={$chatId}, step={$nextIndex}");
             }
 
-            // 3. Chats jadvalida current_stage ni oshirish
             $updateCount = Chats::updateAll(
                 ['current_stage' => new \yii\db\Expression('current_stage + 1')],
                 ['id' => $chatId]
@@ -549,22 +465,17 @@ class ChatController extends Controller
                 throw new \Exception("Chat holati yangilanmadi: chat_id={$chatId}");
             }
 
-            // Hammasi yaxshi bo'lsa, bazaga tasdiqlaymiz
             $transaction->commit();
 
         } catch (\Exception $e) {
-            // Xatolik bo'lsa, ortga qaytaramiz
             $transaction->rollBack();
 
-            // Logga yozamiz
             Yii::error("continueTopic xatoligi: " . $e->getMessage());
 
-            // Foydalanuvchiga xato xabarini yuboramiz
             $this->sendStreamError("Noma'lum xatolik yuz berdi! Iltimos sahifani qayta yuklang");
             return;
         }
 
-        // ── Keyingi qismni frontga yuborish ───────────────────────────────────
         echo 'data: ' . json_encode(['content' => $nextPartText]) . "\n\n";
         flush();
         if (($nextIndex + 1) === $totalParts) {
@@ -586,9 +497,6 @@ class ChatController extends Controller
         $fullContent   = '';
         $firstPartSent = false;
 
-        // [NEXT] belgisi bir nechta chunk ga bo'linib kelishi mumkin.
-        // Shuning uchun oxirgi 6 belgini alohida saqlab, keyingi chunk bilan
-        // birgalikda tekshiramiz.
         $tailBuffer = '';
 
         try {
@@ -599,17 +507,14 @@ class ChatController extends Controller
             ) {
                 $fullContent .= $chunk;
 
-                // 1-qism yuborilgan bo'lsa — chunk faqat $fullContent ga yig'iladi
                 if ($firstPartSent) {
                     return;
                 }
 
-                // Tail buffer + yangi chunk birlashtirilib [NEXT] axtariladi
                 $search  = $tailBuffer . $chunk;
                 $nextPos = strpos($search, '[NEXT]');
 
                 if ($nextPos !== false) {
-                    // [NEXT] gacha bo'lgan qismni frontga yuboramiz
                     $toSend = substr($search, 0, $nextPos);
 
                     if ($toSend !== '') {
@@ -622,8 +527,6 @@ class ChatController extends Controller
                     $tailBuffer    = '';
 
                 } else {
-                    // [NEXT] hali yo'q.
-                    // Oxirgi 6 belgini tailBuffer da saqlab, qolganini frontga yuboramiz.
                     $toSend     = strlen($search) > 6 ? substr($search, 0, -6) : '';
                     $tailBuffer = strlen($search) > 6 ? substr($search, -6) : $search;
 
@@ -634,7 +537,6 @@ class ChatController extends Controller
                 }
             });
 
-            // Agar [NEXT] umuman bo'lmasa — tailBuffer ham frontga chiqishi kerak
             if (!$firstPartSent && $tailBuffer !== '') {
                 echo 'data: ' . json_encode(['content' => $tailBuffer]) . "\n\n";
                 flush();
@@ -656,13 +558,13 @@ class ChatController extends Controller
     {
         switch ($topicType) {
             case 'theory':
-                return $total_parts;          // n qism + 1 xulosa
+                return $total_parts;
 
             case 'practice':
-                return 2;                          // 1. Berilishi + 2. Yechim tahlili
+                return 2;
 
             case 'lesson':
-                return ($total_parts + 1) + 2 + 2;
+                return $total_parts + 2 + 2;
 
             default:
                 return 0;
@@ -682,19 +584,16 @@ class ChatController extends Controller
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-            // 1. System xabari: "Davom etish"
             $systemMsg = Messages::create($chat_id, 'system', 'command', ['text' => 'Amaliy topshiriqlar']);
             if (!$systemMsg) {
                 throw new \Exception("System xabari saqlanmadi: chat_id={$chat_id}");
             }
 
-            // 2. Mentor xabarini saqlash
             $mentorMsg = Messages::create($chat_id, 'mentor', 'practice', ['text' => $content]);
             if (!$mentorMsg) {
                 throw new \Exception("Mentor amaliy topshirig'i saqlanmadi: chat_id={$chat_id}");
             }
 
-            // 3. Chats jadvalida current_stage ni oshirish
             $updateCount = Chats::updateAll(
                 ['current_stage' => new \yii\db\Expression('current_stage + 1')],
                 ['id' => $chat_id]
@@ -704,14 +603,11 @@ class ChatController extends Controller
                 throw new \Exception("Chat holati yangilanmadi: chat_id={$chat_id}");
             }
 
-            // Hammasi yaxshi bo'lsa, bazaga tasdiqlaymiz
             $transaction->commit();
 
         } catch (\Exception $e) {
-            // Xatolik bo'lsa, ortga qaytaramiz
             $transaction->rollBack();
 
-            // Logga yozamiz
             Yii::error("handleUserGeneratePractice xatoligi: " . $e->getMessage());
         }
         Yii::$app->response->isSent = true;
@@ -746,7 +642,6 @@ class ChatController extends Controller
         } catch (\Exception $e) {
             $transaction->rollBack();
 
-            // Logga yozamiz
             Yii::error("handleUserAskQuestion xatoligi: " . $e->getMessage());   
         }
         Yii::$app->response->isSent = true;
@@ -766,7 +661,6 @@ class ChatController extends Controller
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-            // 1. System xabari: "Davom etish"
             foreach ($answers as $answer){
                 $userMsg = Messages::create($chat_id, 'user', 'text', ['text' => "{$answer['task_number']}-topshiriq javobi: \n {$answer['answer']}"]);
                 if (!$userMsg) {
@@ -774,13 +668,11 @@ class ChatController extends Controller
                 }
             }
 
-            // 2. Mentor xabarini saqlash
             $mentorMsg = Messages::create($chat_id, 'mentor', 'practice_result', ['text' => $feedback]);
             if (!$mentorMsg) {
                 throw new \Exception("Mentor amaliy topshiriqni tekshirgani saqlanmadi: chat_id={$chat_id}");
             }
 
-            // 3. Chats jadvalida current_stage ni oshirish
             $updateCount = Chats::updateAll(
                 ['current_stage' => new \yii\db\Expression('current_stage + 1')],
                 ['id' => $chat_id]
@@ -790,14 +682,11 @@ class ChatController extends Controller
                 throw new \Exception("Chat holati yangilanmadi: chat_id={$chat_id}");
             }
 
-            // Hammasi yaxshi bo'lsa, bazaga tasdiqlaymiz
             $transaction->commit();
 
         } catch (\Exception $e) {
-            // Xatolik bo'lsa, ortga qaytaramiz
             $transaction->rollBack();
 
-            // Logga yozamiz
             Yii::error("handleUserCheckPractice xatoligi: " . $e->getMessage());
         }
         Yii::$app->response->isSent = true;
@@ -836,7 +725,6 @@ class ChatController extends Controller
                 throw new \Exception("System xabari saqlanmadi: chat_id={$chat_id}");
             }
 
-            // 2. Mentor xabarini saqlash
             $mentorMsg = Messages::create($chat_id, 'mentor', 'quiz', $content);
             if (!$mentorMsg) {
                 throw new \Exception("Mentor quiz testi saqlanmadi: chat_id={$chat_id}");
@@ -927,9 +815,6 @@ class ChatController extends Controller
         ]);
     }
 
-    // =========================================================================
-    // Private helpers — Validation & Resolution
-    // =========================================================================
 
     private function requireAjax(): void
     {
@@ -972,9 +857,6 @@ class ChatController extends Controller
         return $course;
     }
 
-    /**
-     * Topic_id bo'yicha mavzuni qaytaradi.
-     */
     private function resolveTopic(int $topic_id, int $course_id, bool $useJson = false): array
     {
         if (!$topic_id) {
@@ -1002,11 +884,6 @@ class ChatController extends Controller
         return $topic;
     }
 
-    /**
-     * Darajani qaytaradi.
-     *  - Tizimga kirgan foydalanuvchi → session'dan oladi.
-     *  - Mehmon                        → request body'dan oladi.
-     */
     private function resolveLevel(bool $useJson = false): array
     {
         if (!Yii::$app->user->isGuest) {
@@ -1035,7 +912,6 @@ class ChatController extends Controller
         return $level;
     }
  
-    // faqat userlar uchun
     private function resolveChat(int $topic_id, array $extra_data = []) {
         $needed_data = array_merge(['id'], $extra_data);
         $data = Chats::find()
@@ -1057,9 +933,6 @@ class ChatController extends Controller
         }
     }
 
-    /**
-     * So'rov tanasidan majburiy string maydonni oladi.
-     */
     private function requireField(array $body, string $field, bool $useJson = false): string
     {
         $value = trim($body[$field] ?? '');
@@ -1071,9 +944,6 @@ class ChatController extends Controller
         return $value;
     }
 
-    /**
-     * PromptService orqali prompt matnini oladi.
-     */
     private function resolvePrompt(string $type, array $params, string $topicType = ''): string
     {
         $prompt = PromptService::getPrompt($type, $params, $topicType);
@@ -1085,15 +955,6 @@ class ChatController extends Controller
         return $prompt;
     }
 
-    // =========================================================================
-    // Private helpers — Response
-    // =========================================================================
-
-    /**
-     * SSE orqali streaming javobini yuboradi.
-     *
-     * @param callable|null $onChunk  Har bir chunk uchun callback (user logikasi uchun).
-     */
     private function streamResponse(string $prompt, ?callable $onChunk = null): void
     {
         $gemini_api = new GeminiApiService();
@@ -1130,9 +991,6 @@ class ChatController extends Controller
         exit(0);
     }
 
-    /**
-     * Xato holatida response turига qarab to'g'ri format bilan chiqadi.
-     */
     private function failWith(string $message, bool $useJson = false): never
     {
         if ($useJson) {
@@ -1143,13 +1001,6 @@ class ChatController extends Controller
         exit(0);
     }
 
-    // =========================================================================
-    // Private helpers — Business logic
-    // =========================================================================
-
-    /**
-     * Gemini'dan kelgan xom matnni JSON arrayga aylantiradi.
-     */
     private function parseJsonResponse(string $raw): ?array
     {
         $clean = preg_replace('/^```json\s*|\s*```$/m', '', trim($raw));
@@ -1158,11 +1009,6 @@ class ChatController extends Controller
         return (json_last_error() === JSON_ERROR_NONE) ? $json : null;
     }
 
-    /**
-     * Quiz massivini ikki qismga ajratadi:
-     *   [0] $quiz_data  — to'g'ri javob + izoh  (DB/session'ga saqlanadi)
-     *   [1] $quiz_clean — foydalanuvchiga boradi (to'g'ri javob yashirilgan)
-     */
     private function splitQuizData(array $quiz): array
     {
         $quiz_data  = [];
@@ -1178,9 +1024,6 @@ class ChatController extends Controller
         return [$quiz_data, $quiz_clean];
     }
 
-    /**
-     * Tanlangan javoblarni to'g'ri javoblar bilan solishtiradi.
-     */
     private function buildQuizResults(array $selected, array $quiz_data): array
     {
         $results = [];
@@ -1203,9 +1046,6 @@ class ChatController extends Controller
         return $results;
     }
 
-    /**
-     * Foydalanuvchi javoblar massivini satr formatiga o'tkazadi.
-     */
     private function formatAnswers(array $user_answers): string
     {
         $answers = '';

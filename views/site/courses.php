@@ -3,7 +3,6 @@
   $this->title = "Kurslar";
   $this->registerCssFile(Url::base()."/css/site/courses.css");
 ?>
-<!-- ═══════════ PAGE HEADER ═══════════ -->
 <div class="page-header">
   <div class="page-header-orb"></div>
   <div class="page-header-inner">
@@ -18,7 +17,6 @@
   </div>
 </div>
 
-<!-- ═══════════ COURSES GRID ═══════════ -->
 <main class="courses-main">
   <div class="courses-grid" id="coursesGrid">
     <?php foreach($courses as $course): ?>

@@ -1,39 +1,21 @@
-// ═══════════════════════════════════════════
-//  topic.js — Mavzu yuklash (Guest + User rejimi)
-// ═══════════════════════════════════════════
-// Bog'liqlik: helpers.js, flowManager.js
-
-// ── Rol va resume ma'lumotlari ───────────────
 const IS_GUEST = window.__USER_ROLE__ === 'guest';
 
-// lesson_content quiz/practice uchun kerak, resume dan tiklanadi
 let lesson_content  = window.__RESUME__?.lesson_content || '';
 
-// ── Shared holat ─────────────────────────────
 let isTyping  = false;
 let firstLoader = null;
 
-// ── Guest-only holat ─────────────────────────
 let messageQueue   = [];
 let currentBuffer  = '';
 let isStreaming    = false;
 let streamFinishedSuccessfully = false;
 let messageCount   = 0;
 
-// ── User-only holat ──────────────────────────
-// (part_index backendda saqlanadi, frontend bilmaydi)
-
-// ════════════════════════════════════════════
-//  PUBLIC: Mavzuni boshlash
-// ════════════════════════════════════════════
 async function startTopic() {
   _resetTopicState();
   IS_GUEST ? await _startGuest() : await startUser();
 }
 
-// ════════════════════════════════════════════
-//  GUEST REJIMI
-// ════════════════════════════════════════════
 async function _startGuest() {
   firstLoader = showLoader(chat);
   try {
@@ -95,7 +77,6 @@ function _showNextGuestMessage() {
   });
 }
 
-// ── Guest: navbat bo'sh, stream hali kelayapti ─
 function _waitForGuestQueue() {
   const waitDiv = createBotMessageContainer();
   waitDiv.classList.add('bot');
@@ -115,9 +96,6 @@ function _waitForGuestQueue() {
   }, 100);
 }
 
-// ════════════════════════════════════════════
-//  USER REJIMI
-// ════════════════════════════════════════════
 async function startUser() {
   const messageDiv = createBotMessageContainer();
   const loader = showLoader(chat);
@@ -160,11 +138,6 @@ async function _fetchUserPart() {
   }
 }
 
-// ════════════════════════════════════════════
-//  SHARED: "Davom etish" tugmasi va bosilishi
-// ════════════════════════════════════════════
-
-// Qismlar orasidagi mahalliy "Davom etish" (FlowManager tugmasi emas)
 function _showLocalContinueButton() {
   const div = createBotMessageContainer();
   div.classList.add('bot');
@@ -172,7 +145,6 @@ function _showLocalContinueButton() {
   createButton('Davom etish ➡', 'continue-topic');
 }
 
-// app.js tomonidan chaqiriladi
 function handleContinue(event) {
   event.target.closest('.center-btn').remove();
   addUserMessage('Davom etish');
@@ -185,9 +157,6 @@ function handleContinue(event) {
   }
 }
 
-// ════════════════════════════════════════════
-//  Typing effekt (topic + quiz uchun umumiy)
-// ════════════════════════════════════════════
 function typeText(container, html, callback) {
   if (!html) {
     container.innerHTML = '<span>❌ Xatolik yuz berdi!</span>';
@@ -211,9 +180,6 @@ function typeText(container, html, callback) {
   }, 2);
 }
 
-// ════════════════════════════════════════════
-//  Yordamchilar
-// ════════════════════════════════════════════
 function _buildRequest(extra = {}) {
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   const urlParams = new URLSearchParams(window.location.search);
@@ -234,7 +200,6 @@ function _buildRequest(extra = {}) {
 }
 
 function _resetTopicState() {
-  // lesson_content saqlanadi — resume uchun kerak
   messageQueue   = [];
   currentBuffer  = '';
   isTyping       = false;
@@ -242,5 +207,4 @@ function _resetTopicState() {
   streamFinishedSuccessfully = false;
   messageCount   = 0;
   firstLoader    = null;
-  // currentPartIndex saqlanadi — user rejimida resume uchun
 }

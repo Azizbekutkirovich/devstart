@@ -38,10 +38,8 @@ $this->registerCssFile(Url::base()."/css/dashboard/home.css");
   ]
 */
 ?>
-<!-- MAIN CONTENT -->
 <main class="main">
 
-  <!-- TOP -->
   <div class="topbar">
     <div class="welcome-text">
       <h1>Salom, <?=$fullname?>! 👋</h1>
@@ -56,7 +54,6 @@ $this->registerCssFile(Url::base()."/css/dashboard/home.css");
     </div>
   </div>
 
-  <!-- COURSE CARD -->
   <div class="section-label">Siz tanlagan kurs</div>
   <div class="course-hero">
     <div class="course-hero-bg"></div>
@@ -93,7 +90,6 @@ $this->registerCssFile(Url::base()."/css/dashboard/home.css");
     </div>
   </div>
 
-  <!-- MODULES -->
   <div class="section-label">Kurs modullari</div>
   <div class="modules-area">
 

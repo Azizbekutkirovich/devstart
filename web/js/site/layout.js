@@ -1,13 +1,21 @@
 (function() {
-  // Theme
   const html = document.documentElement;
-  const saved = localStorage.getItem('devstart-theme');
-  if (saved) html.setAttribute('data-theme', saved);
+  let saved = localStorage.getItem('devstart-theme');
+
+  if (!saved) {
+    saved = 'light';
+    localStorage.setItem('devstart-theme', 'light');
+  }
+
+  html.setAttribute('data-theme', saved);
+
   document.querySelectorAll('.theme-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
       const isDark = html.getAttribute('data-theme') === 'dark';
-      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      localStorage.setItem('devstart-theme', isDark ? 'light' : 'dark');
+      const newTheme = isDark ? 'light' : 'dark';
+      
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('devstart-theme', newTheme);
     });
   });
 

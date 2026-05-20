@@ -1,4 +1,3 @@
-// Level selection
 let selectedLevelId = null;
 function selectLevel(el, level_id) {
   document.querySelectorAll('.level-card').forEach(c => c.classList.remove('selected'));
@@ -7,7 +6,6 @@ function selectLevel(el, level_id) {
   document.getElementById('nextBtn').disabled = false;
 }
 
-// Step navigation
 function goStep2() {
   if (!selectedLevelId) return;
   document.getElementById('step1').classList.remove('active');
@@ -35,10 +33,8 @@ function goStep1() {
   document.getElementById('progressBar').style.width = '0%';
 }
 
-// Set initial progress
 setTimeout(() => { document.getElementById('progressBar').style.width = '0%'; }, 100);
 
-// Modal
 function openModal(e) { e.preventDefault(); document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }

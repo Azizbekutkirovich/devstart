@@ -34,10 +34,8 @@ $this->registerCssFile(Url::base()."/css/dashboard/chat.css");
     </div>
   </div>
 
-  <!-- CHAT MESSAGES -->
   <div id="chat"></div>
 
-  <!-- CHAT INPUT -->
   <div class="chat-input-wrap" id="chatInput">
     <textarea id="userInput" class="auto-grow" placeholder="Mavzu bo'yicha savolingizni yozing..."></textarea>
     <button id="askQuestionBtn">Yuborish ↑</button>

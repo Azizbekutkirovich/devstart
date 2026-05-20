@@ -19,7 +19,7 @@
   --sidebar-w: 240px;
 }
 
-/* ── LIGHT MODE ── */
+/* LIGHT MODE */
 body.light-mode {
   --bg: #f0f4f8;
   --surface: #ffffff;
@@ -84,7 +84,7 @@ body {
   transition: background .3s, color .3s;
 }
 
-/* ── SIDEBAR ── */
+/* SIDEBAR */
 .sidebar {
   width: var(--sidebar-w);
   background: var(--surface);
@@ -181,7 +181,7 @@ body.light-mode .nav-link .icon {
   background: linear-gradient(135deg, var(--accent2), var(--accent));
 }
 
-/* ── THEME TOGGLE ── */
+/* THEME TOGGLE */
 .theme-toggle {
   display: flex;
   align-items: center;
@@ -267,7 +267,7 @@ body.light-mode .theme-toggle .icon {
   color: var(--muted);
 }
 
-/* ── MOBILE TOPBAR ── */
+/* MOBILE TOPBAR */
 .mobile-topbar {
   display: none;
   position: fixed;

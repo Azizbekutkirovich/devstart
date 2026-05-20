@@ -1,4 +1,4 @@
-/* ── MAIN ── */
+/* MAIN */
 .main {
   margin-left: var(--sidebar-w);
   flex: 1;
@@ -6,7 +6,7 @@
   max-width: 960px;
 }
 
-/* ── TOP BAR ── */
+/* TOP BAR */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -56,7 +56,7 @@ body.light-mode .overall-progress-label  {
   font-weight: 700;
 }
 
-/* ── SECTION LABEL ── */
+/* SECTION LABEL */
 .section-label {
   font-size: .7rem;
   font-weight: 700;
@@ -66,7 +66,7 @@ body.light-mode .overall-progress-label  {
   margin-bottom: 14px;
 }
 
-/* ── COURSE HERO ── */
+/* COURSE HERO */
 .course-hero {
   position: relative;
   border-radius: 20px;
@@ -163,7 +163,7 @@ body.light-mode .course-tag {
 .mentor-avatar img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Rasmni cho'zilmasdan divni to'ldirib turishini ta'minlaydi */
+    object-fit: cover;
     display: block;
 }
 
@@ -221,17 +221,17 @@ body.light-mode .mentor-name {
 
 .cp-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, .1); /* Orqa fon rangi */
+  stroke: rgba(255, 255, 255, .1);
   stroke-width: 4;
 }
 
 .cp-fill {
   fill: none;
-  stroke: var(--accent); /* Progress rangi */
+  stroke: var(--accent);
   stroke-width: 4;
-  stroke-linecap: round; /* Chiziq uchini yumaloq qilish */
-  transition: stroke-dashoffset 0.5s ease-in-out; /* O'zgarish animatsiyasi */
-  transform: rotate(-90deg); /* Progress tepadan boshlanishi uchun */
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease-in-out;
+  transform: rotate(-90deg);
   transform-origin: center;
 }
 
@@ -251,10 +251,10 @@ body.light-mode .cp-text {
 }
 
 body.light-mode .cp-bg {
-  stroke: #e6e6e6; /* Orqa fon rangi */
+  stroke: #e6e6e6;
 }
 
-/* ── MODULES ── */
+/* MODULES */
 .modules-area {
   display: flex;
   flex-direction: column;
@@ -487,25 +487,22 @@ body.light-mode .topic-item {
   gap: 8px;
 }
 
-/* Progress bar yo'lakchasi (bo'sh qismi) */
 .topic-bar-track {
   width: 120px;
   height: 6px;
-  background-color: rgba(255, 255, 255, 0.1); /* Fon rangi */
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   overflow: hidden;
   margin-top: 4px;
 }
 
-/* To'ladigan qism */
 .topic-bar-fill {
   height: 100%;
-  background-color: #3b82f6; /* Moviy rang (yoki xohlagan rangingiz) */
+  background-color: #3b82f6;
   border-radius: 10px;
-  transition: width 0.3s ease; /* O'zgarish silliq bo'lishi uchun */
+  transition: width 0.3s ease;
 }
 
-/* Matnli foiz ko'rsatkichi uchun (ixtiyoriy) */
 .topic-pct {
   font-size: .7rem;
   color: var(--muted);
@@ -514,9 +511,8 @@ body.light-mode .topic-item {
   display: inline-block;
 }
 
-/* Agarda progress 100 bo'lsa, rangni yashilga o'zgartirish (qo'shimcha UX) */
 .topic-item .status-done + .topic-info .topic-bar-fill {
-  background-color: #10b981; /* Yashil rang */
+  background-color: #10b981;
 }
 
 body.light-mode .topic-bar-track {

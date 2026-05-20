@@ -5,10 +5,8 @@ $(document).on('submit', '#registerForm', function(e) {
     var form = $(this);
     var submitBtn = form.find('[type="submit"]');
 
-    // Loading holatini ko'rsatish
     submitBtn.prop('disabled', true).html('<span class="loader"></span> Yuklanmoqda...');
     
-    // Selected ma'lumotlarni form data ga qo'shish
     var formData = form.serialize();
     formData += '&SelectedForm[course_id]=' + encodeURIComponent(course_id);
     formData += '&SelectedForm[level_id]=' + encodeURIComponent(selectedLevelId);

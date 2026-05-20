@@ -20,7 +20,6 @@ DashboardAsset::register($this);
 <body>
 <?php $this->beginBody() ?>
 
-<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="logo">
     <img src="<?=Url::base()?>/images/icons/devstart-logo.png" class="navbar-logo">
@@ -74,7 +73,6 @@ DashboardAsset::register($this);
   </div>
 </aside>
 
-<!-- MOBILE TOPBAR -->
 <div class="mobile-topbar">
   <div class="mobile-logo">
     <img src="<?=Url::base()?>/images/icons/devstart-logo.png" class="navbar-logo">

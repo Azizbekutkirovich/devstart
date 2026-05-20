@@ -1,22 +1,4 @@
-// ═══════════════════════════════════════════
-//  flowManager.js — Qadamlar oqimini boshqarish
-//
-//  Qoidalar:
-//  • Har bir step faqat stepDone(stepId) chaqiradi
-//  • Keyingi nima bo'lishini faqat shu fayl biladi
-//  • Yangi flow qo'shish = flows obektiga 1 qator
-// ═══════════════════════════════════════════
-
-// ── Flow konfiguratsiyalari ──────────────────
-//
-//  Har bir step:
-//    id        — stepDone() ga beriladigan nom
-//    label     — tugma matni
-//    action    — bosilganda chaqiriladigan funksiya nomi (string)
-//    removeBtn — bosilgandan oldin button o'chirilsinmi?
-//
 const FLOWS = {
-  // lesson
   lesson: [
     { id: 'topic',    label: 'Darsni boshlash',              action: 'startTopic',    removeBtn: true  },
     { id: 'quiz',     label: 'Quiz testlar',           action: 'startTest',     removeBtn: true  },
@@ -35,26 +17,19 @@ const FLOWS = {
   ],
 };
 
-// FlowManager
 const FlowManager = (() => {
   let _steps    = [];
   let _index    = -1;
   let _flowName = '';
 
-  /**
-   * @param {string} flowName 
-   * @param {number} startFrom - Boshlang'ich qadam (0, 1, 2...)
-   * @param {boolean} isPending - Agar true bo'lsa, joriy qadam tugmachasini chiqarmaydi
-   */
+
   function init(flowName = 'lesson', startFrom = 0, isPending = false) {
     _flowName = flowName;
     _steps    = FLOWS[flowName] ?? FLOWS.lesson;
     _index    = startFrom; 
 
-    // Agar jarayon tugallanmagan (isPending) bo'lsa, 
-    // keyingi bosqich tugmasini chiqarmaymiz, foydalanuvchi amalini kutamiz.
     if (!isPending) {
-      _showNextButton(true); // true - joriy indeksdagi tugmani ko'rsatish
+      _showNextButton(true);
     }
   }
 
@@ -63,7 +38,7 @@ const FlowManager = (() => {
     if (current && current.id !== stepId) {
       console.warn(`FlowManager: kutilgan "${current.id}", kelgan "${stepId}"`);
     }
-    _showNextButton(false); // Keyingi qadamga o'tish
+    _showNextButton(false);
   }
 
   function _showNextButton(showCurrent = false) {

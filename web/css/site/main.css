@@ -1,4 +1,4 @@
-/* ════════════════ HERO ════════════════ */
+/* HERO */
 .hero {
   position: relative;
   min-height: 100vh;
@@ -189,7 +189,7 @@
   box-shadow: 0 0 60px rgba(0, 229, 255, .5), 0 0 100px rgba(0, 229, 255, .2);
 }
 
-/* ════════════════ STATS ════════════════ */
+/* STATS */
 .stats-strip {
   position: relative;
   z-index: 1;
@@ -295,7 +295,7 @@
   letter-spacing: .05em;
 }
 
-/* ════════════════ SECTION BASE ════════════════ */
+/* SECTION BASE */
 section {
   position: relative;
   z-index: 1;
@@ -351,7 +351,7 @@ section {
   margin: 0 60px;
 }
 
-/* ════════════════ HOW IT WORKS ════════════════ */
+/* HOW IT WORKS */
 .how-section {
   background: var(--bg2);
 }
@@ -456,7 +456,7 @@ section {
   font-weight: 300;
 }
 
-/* ════════════════ AI MENTOR CARDS (new design) ════════════════ */
+/* AI MENTOR CARDS (yangi dizayn) */
 .mentors-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -707,7 +707,7 @@ section {
   margin-top: 4px;
 }
 
-/* ── Skill Pills (colorful, bigger) ── */
+/* Skill Pill */
 .mentor-skills {
   display: flex;
   flex-wrap: wrap;
@@ -780,7 +780,7 @@ section {
   border-color: rgba(58, 140, 26, .3);
 }
 
-/* ════════════════ COURSES ════════════════ */
+/* COURSES */
 .courses-section {
   background: var(--bg2);
 }
@@ -829,7 +829,6 @@ section {
   transform: scale(1.04);
 }
 
-/* Fallback gradients when no image */
 .course-card:nth-child(1) .course-thumb:not(:has(img[src]:not([src=""]))) {
   background: linear-gradient(135deg, #0a2040, #0d3a6e);
 }
@@ -952,7 +951,7 @@ section {
   background: rgba(0, 229, 255, .05);
 }
 
-/* ════════════════ RESPONSIVE ════════════════ */
+/* RESPONSIVE */
 @media(max-width:1100px) {
   .mentors-grid {
     grid-template-columns: repeat(2, 1fr);

@@ -5,7 +5,6 @@
 ?>
 <main class="about-page">
 
-  <!-- ── HERO ── -->
   <section class="about-hero">
     <div class="hero-tag">// BIZ HAQIMIZDA</div>
     <h1 class="about-h1">
@@ -17,7 +16,6 @@
 
   <div class="section-divider"></div>
 
-  <!-- ── MISSION ── -->
   <section class="section reveal">
     <div class="section-tag">MISSIYAMIZ</div>
     <h2 class="section-title">Nima uchun DevStart?</h2>
@@ -43,14 +41,12 @@
 
   <div class="section-divider"></div>
 
-  <!-- ── TEAM / FOUNDER ── -->
   <section class="section reveal">
     <div class="section-tag">JAMOA</div>
     <h2 class="section-title">Platforma asoschisi</h2>
     <p class="section-sub">DevStart'ni yaratgan va rivojlantiruvchi inson</p>
 
     <div class="team-grid">
-      <!-- FOUNDER CARD -->
       <div class="founder-card">
         <div class="founder-avatar-wrap">
           <div class="founder-avatar">
@@ -93,7 +89,6 @@
         </div>
       </div>
 
-      <!-- Team members -->
       <div class="member-card">
         <div class="member-avatar" style="color:var(--accent)">UO</div>
         <div class="member-name">Umaraliyev Ozodbek</div>
@@ -111,7 +106,6 @@
 
   <div class="section-divider"></div>
 
-  <!-- ── VALUES ── -->
   <section class="section reveal">
     <div class="section-tag">QADRIYATLAR</div>
     <h2 class="section-title">Bizning tamoyillar</h2>
@@ -148,7 +142,6 @@
     </div>
   </section>
 
-  <!-- ── CTA ── -->
   <div class="cta-banner reveal">
     <div class="cta-inner">
       <div class="cta-text">
