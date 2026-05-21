@@ -8,7 +8,11 @@ use yii\httpclient\CurlTransport;
 
 class GeminiApiService
 {
-	private $api_key = $_ENV['GEMINI_API_KEY'];
+	private $api_key;
+
+    public function __construct() {
+        $this->api_key = $_ENV['GEMINI_API_KEY'] ?? null; 
+    }
 
 	public function getContent(string $prompt)
 	{
@@ -70,7 +74,6 @@ class GeminiApiService
         header('X-Accel-Buffering: no');
         header('Connection: keep-alive');
 
-        // Barcha PHP bufferlarini tozalash
         while (ob_get_level() > 0) {
             ob_end_flush();
         }
@@ -97,28 +100,22 @@ class GeminiApiService
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         
-        // Javobni darhol chiqarish (Return qilmaslik)
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
         
-        // Timeout sozlamalari (uzun javoblar uchun)
         curl_setopt($ch, CURLOPT_TIMEOUT, 0); 
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 
-        // Xatolik xabarlarini bodysi bilan olish uchun
         curl_setopt($ch, CURLOPT_FAILONERROR, false);
 
-        // Har bir ma'lumot bo'lagi (chunk) kelganda ishlovchi funksiya
         $errorResponse = '';
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $chunk) use ($callback, $prompt, &$errorResponse) {
-            // Agar foydalanuvchi brauzerni yopib yuborgan bo'lsa, streamni to'xtatamiz
             if (connection_aborted()) {
-                return 0; // cURL ulanishni yopadi
+                return 0;
             }
 
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             if ($httpCode >= 400) {
-                // Agar xato bo'lsa, ma'lumotni ekranga chiqarmaymiz, balki o'zgaruvchiga yig'amiz
                 $errorResponse .= $chunk;
                 return strlen($chunk);
             }
@@ -135,10 +132,8 @@ class GeminiApiService
             return strlen($chunk);
         });
 
-        // So'rovni bajarish
         $result = curl_exec($ch);
 
-        // 1. cURL darajasidagi xatolarni tekshirish (DNS, Timeout, Connection)
         if (curl_errno($ch)) {
             $errorMsg = curl_error($ch);
             $errorCode = curl_errno($ch);
@@ -151,7 +146,6 @@ class GeminiApiService
             throw new \Exception("NETWORK_ERROR");
         }
 
-        // 2. HTTP darajasidagi xatolarni tekshirish (401, 429, 500)
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($httpCode >= 400) {
             if (isset($errorResponse)) {
@@ -167,7 +161,7 @@ class GeminiApiService
             Yii::error([
                 'message' => 'Gemini API HTTP Error',
                 'http_code' => $httpCode,
-                'api_error_message' => $errorMessage, // Butun xatolik javobini logga yozamiz
+                'api_error_message' => $errorMessage,
                 'prompt' => $prompt
             ], 'GeminiStreamClient');
 
