@@ -1,233 +1,207 @@
-<p align="center">
-    <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
-    </a>
-    <h1 align="center">Yii 2 Basic Project Template</h1>
-    <br>
-</p>
+[README.md](https://github.com/user-attachments/files/35333723/README.md)
+# DevStart
 
-Yii 2 Basic Project Template is a skeleton [Yii 2](https://www.yiiframework.com/) application best for
-rapidly creating small projects.
+DevStart — платформа для изучения программирования с использованием искусственного интеллекта. Пользователь выбирает курс и уровень подготовки, изучает темы с помощью AI-ментора, задаёт вопросы по материалу, проходит тестирование и выполняет практические задания. Для зарегистрированных пользователей сохраняются чаты и прогресс обучения.
 
-The template contains the basic features including user login/logout and a contact page.
-It includes all commonly used configurations that would allow you to focus on adding new
-features to your application.
+## Технологический стек
 
-[![Latest Stable Version](https://img.shields.io/packagist/v/yiisoft/yii2-app-basic.svg)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Total Downloads](https://img.shields.io/packagist/dt/yiisoft/yii2-app-basic.svg)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![build](https://github.com/yiisoft/yii2-app-basic/workflows/build/badge.svg)](https://github.com/yiisoft/yii2-app-basic/actions?query=workflow%3Abuild)
+| Технология | Назначение |
+|---|---|
+| PHP | Серверная логика приложения |
+| Yii2 Basic | PHP-фреймворк и MVC-архитектура |
+| MySQL | Хранение пользователей, курсов, тем, сообщений и прогресса |
+| Gemini AI API | Генерация учебных материалов, тестов и проверка практических заданий |
+| HTML | Структура страниц |
+| CSS | Оформление интерфейса |
+| Vanilla JavaScript | Клиентская логика и AJAX-взаимодействие |
 
-DIRECTORY STRUCTURE
--------------------
+Дополнительные PHP-пакеты проекта подключаются через Composer. В частности, используются `yiisoft/yii2-httpclient`, `yiisoft/yii2-authclient` и `vlucas/phpdotenv`.
 
-      assets/             contains assets definition
-      commands/           contains console commands (controllers)
-      config/             contains application configurations
-      controllers/        contains Web controller classes
-      mail/               contains view files for e-mails
-      models/             contains model classes
-      runtime/            contains files generated during runtime
-      tests/              contains various tests for the basic application
-      vendor/             contains dependent 3rd-party packages
-      views/              contains view files for the Web application
-      web/                contains the entry script and Web resources
+## Интеграция Gemini AI API
 
+Интеграция с Gemini реализована в следующих файлах:
 
+- [`services/GeminiApiService.php`](services/GeminiApiService.php) — отправка запросов к Gemini API, получение обычного ответа и потоковая передача ответа через Server-Sent Events (SSE).
+- [`services/PromptService.php`](services/PromptService.php) — подготовка промптов для генерации уроков, тестов, практических заданий и других учебных сценариев.
+- [`controllers/ChatController.php`](controllers/ChatController.php) — вызов AI-сервиса из учебного чата, обработка ответов, сохранение сообщений и результатов обучения.
 
-REQUIREMENTS
-------------
+В `GeminiApiService` используется модель `gemini-2.5-flash`.
 
-The minimum requirement by this project template that your Web server supports PHP 7.4.
+### Учебные сценарии с использованием AI
 
+Основные действия находятся в `ChatController`:
 
-INSTALLATION
-------------
+| Действие | Назначение |
+|---|---|
+| `actionGenerateTopic()` | Генерация учебного материала по выбранной теме |
+| `actionContinueTopic()` | Вывод следующей части сгенерированного урока |
+| `actionAskQuestionAboutTopic()` | Ответ AI на вопрос пользователя по текущей теме |
+| `actionGenerateQuizTest()` | Генерация теста по изученному материалу |
+| `actionCheckQuiz()` | Проверка ответов на тест |
+| `actionGeneratePractice()` | Генерация практических заданий |
+| `actionCheckPractice()` | Проверка решений пользователя с помощью AI |
 
-### Install via Composer
+Для потоковой передачи текста используется SSE. Для отдельных операций, например генерации теста, контроллер обрабатывает ответ Gemini как JSON.
 
-If you do not have [Composer](https://getcomposer.org/), you may install it by following the instructions
-at [getcomposer.org](https://getcomposer.org/doc/00-intro.md#installation-nix).
+Ключ API хранится в переменной окружения `GEMINI_API_KEY`. Его нельзя размещать в публичном репозитории.
 
-You can then install this project template using the following command:
+## Контроллеры
 
-~~~
-composer create-project --prefer-dist yiisoft/yii2-app-basic basic
-~~~
+Контроллеры расположены в каталоге [`controllers/`](controllers/).
 
-Now you should be able to access the application through the following URL, assuming `basic` is the directory
-directly under the Web root.
+### `SiteController`
 
-~~~
-http://localhost/basic/web/
-~~~
+Отвечает за публичную часть платформы:
 
-### Install from an Archive File
+- `actionMain()` — главная страница; получает список менторов и несколько курсов.
+- `actionCourses()` — страница со списком доступных курсов.
+- `actionCoursePreview($course_id)` — предварительный просмотр курса, ментора, модулей и тем.
+- `actionAboutUs()` — страница с информацией о платформе.
+- `actions()` — подключает стандартное действие Yii2 для отображения ошибок.
 
-Extract the archive file downloaded from [yiiframework.com](https://www.yiiframework.com/download/) to
-a directory named `basic` that is directly under the Web root.
+### `AuthController`
 
-Set cookie validation key in `config/web.php` file to some random secret string:
+Отвечает за регистрацию, вход и выбор учебного курса:
 
-```php
-'request' => [
-    // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-    'cookieValidationKey' => '<secret random string goes here>',
-],
+- `actionStart($course_id)` — страница начала обучения; отображает форму регистрации или данные для авторизованного пользователя.
+- `actionLogin()` — авторизация по форме.
+- `actionRegister()` — AJAX-регистрация пользователя с сохранением выбранного курса и уровня.
+- `actionLogout()` — завершение пользовательской сессии.
+- `actionGoogleRedirect($operation)` — перенаправление пользователя на авторизацию через Google.
+- `actionGoogleCallback()` — обработка ответа Google OAuth; выполняет регистрацию или вход.
+- `actionAddCourse($course_id, $level_id)` — добавление курса и уровня в список учебных данных пользователя.
+- `actionChangeCourse($user_data_id)` — переключение активного курса и уровня.
+
+### `DashboardController`
+
+Отвечает за личный кабинет авторизованного пользователя и демонстрационные страницы для гостей:
+
+- `actionHome()` — главная страница личного кабинета; показывает активный курс, уровень, ментора, модули, темы и прогресс.
+- `actionMyCourses()` — список учебных курсов пользователя, включая активный курс и остальные добавленные курсы.
+- `actionProfile()` — отображение данных профиля пользователя.
+- `actionHomePreview()` — демонстрационная версия главной страницы кабинета.
+- `actionMyCoursesPreview()` — демонстрационная версия страницы курсов.
+- `actionProfilePreview()` — демонстрационная версия страницы профиля.
+
+В контроллере также находятся методы расчёта прогресса по темам, модулям и курсу.
+
+### `ChatController`
+
+Отвечает за учебный чат и взаимодействие с AI-ментором:
+
+- `actionChat($topic_id)` — открывает учебный чат авторизованного пользователя, загружает историю сообщений и состояние прохождения темы.
+- `actionChatPreview($course_id, $topic_id, $level_id)` — открывает предварительный просмотр учебного чата для гостя.
+- `actionGenerateTopic()` — формирует запрос и запускает генерацию материала по теме.
+- `actionContinueTopic()` — отправляет следующую часть ранее сгенерированного материала.
+- `actionAskQuestionAboutTopic()` — передаёт вопрос пользователя AI-ментору.
+- `actionGenerateQuizTest()` — генерирует тест по содержанию урока.
+- `actionCheckQuiz()` — проверяет выбранные ответы и возвращает результат.
+- `actionGeneratePractice()` — запрашивает практические задания по теме.
+- `actionCheckPractice()` — отправляет ответы пользователя на проверку.
+
+Контроллер также содержит вспомогательные методы для формирования промптов, потоковой передачи ответов, обработки ответов Gemini, сохранения истории чата и разделения пользователей на гостевой и авторизованный сценарии.
+
+## Локальная установка и запуск
+
+### Требования
+
+Перед установкой необходимо подготовить:
+
+- PHP версии не ниже `7.4`;
+- MySQL;
+- Apache или другой веб-сервер с поддержкой PHP;
+- Composer;
+- включённое PHP-расширение `curl` для запросов к Gemini API.
+
+Для локального запуска в Windows можно использовать XAMPP.
+
+### 1. Клонирование проекта
+
+Откройте терминал в каталоге веб-сервера и выполните:
+
+```bash
+git clone https://github.com/Azizbekutkirovich/devstart.git
 ```
 
-You can then access the application through the following URL:
+Для XAMPP проект можно разместить в каталоге:
 
-~~~
-http://localhost/basic/web/
-~~~
+```text
+D:\xampp\htdocs\devstart
+```
 
+### 2. Установка PHP-зависимостей
 
-### Install with Docker
+Перейдите в каталог проекта:
 
-Update your vendor packages
+```bash
+cd devstart
+```
 
-    docker-compose run --rm php composer update --prefer-dist
-    
-Run the installation triggers (creating cookie validation code)
+Установите зависимости:
 
-    docker-compose run --rm php composer install    
-    
-Start the container
+```bash
+composer install
+```
 
-    docker-compose up -d
-    
-You can then access the application through the following URL:
+### 3. Создание базы данных
 
-    http://127.0.0.1:8000
+В MySQL создайте базу данных с названием `devstart` и кодировкой `utf8mb4`.
 
-**NOTES:** 
-- Minimum required Docker engine version `17.04` for development (see [Performance tuning for volume mounts](https://docs.docker.com/docker-for-mac/osxfs-caching/))
-- The default configuration uses a host-volume in your home directory `.docker-composer` for composer caches
-
-
-CONFIGURATION
--------------
-
-### Database
-
-Edit the file `config/db.php` with real data, for example:
+Текущие параметры подключения находятся в `config/db.php`:
 
 ```php
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
+    'dsn' => 'mysql:host=localhost;dbname=devstart',
     'username' => 'root',
-    'password' => '1234',
-    'charset' => 'utf8',
+    'password' => '',
+    'charset' => 'utf8mb4',
 ];
 ```
 
-**NOTES:**
-- Yii won't create the database for you, this has to be done manually before you can access it.
-- Check and edit the other files in the `config/` directory to customize your application as required.
-- Refer to the README in the `tests` directory for information specific to basic application tests.
+При необходимости измените `host`, `dbname`, `username` и `password` под настройки локального MySQL.
 
+После создания базы данных необходимо импортировать структуру и начальные данные таблиц. Если SQL-дамп базы данных не включён в репозиторий, его нужно получить отдельно: без таблиц и необходимых записей приложение не сможет полноценно работать.
 
-TESTING
--------
+### 4. Настройка переменных окружения
 
-Tests are located in `tests` directory. They are developed with [Codeception PHP Testing Framework](https://codeception.com/).
-By default, there are 3 test suites:
+В корне проекта создайте файл `.env`:
 
-- `unit`
-- `functional`
-- `acceptance`
+```dotenv
+GEMINI_API_KEY=your_gemini_api_key
 
-Tests can be executed by running
-
-```
-vendor/bin/codecept run
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
 
-The command above will execute unit and functional tests. Unit tests are testing the system components, while functional
-tests are for testing user interaction. Acceptance tests are disabled by default as they require additional setup since
-they perform testing in real browser. 
+`GEMINI_API_KEY` необходим для работы AI-функций. `GOOGLE_CLIENT_ID` и `GOOGLE_CLIENT_SECRET` используются для входа и регистрации через Google.
 
+Если Google OAuth не настраивается, соответствующие параметры необходимо корректно обработать в конфигурации приложения.
 
-### Running  acceptance tests
+### 5. Проверка конфигурации URL
 
-To execute acceptance tests do the following:  
+В `config/web.php` для локального запуска проекта в подкаталоге XAMPP задано:
 
-1. Rename `tests/acceptance.suite.yml.example` to `tests/acceptance.suite.yml` to enable suite configuration
-
-2. Replace `codeception/base` package in `composer.json` with `codeception/codeception` to install full-featured
-   version of Codeception
-
-3. Update dependencies with Composer 
-
-    ```
-    composer update  
-    ```
-
-4. Download [Selenium Server](https://www.seleniumhq.org/download/) and launch it:
-
-    ```
-    java -jar ~/selenium-server-standalone-x.xx.x.jar
-    ```
-
-    In case of using Selenium Server 3.0 with Firefox browser since v48 or Google Chrome since v53 you must download [GeckoDriver](https://github.com/mozilla/geckodriver/releases) or [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads) and launch Selenium with it:
-
-    ```
-    # for Firefox
-    java -jar -Dwebdriver.gecko.driver=~/geckodriver ~/selenium-server-standalone-3.xx.x.jar
-    
-    # for Google Chrome
-    java -jar -Dwebdriver.chrome.driver=~/chromedriver ~/selenium-server-standalone-3.xx.x.jar
-    ``` 
-    
-    As an alternative way you can use already configured Docker container with older versions of Selenium and Firefox:
-    
-    ```
-    docker run --net=host selenium/standalone-firefox:2.53.0
-    ```
-
-5. (Optional) Create `yii2basic_test` database and update it by applying migrations if you have them.
-
-   ```
-   tests/bin/yii migrate
-   ```
-
-   The database configuration can be found at `config/test_db.php`.
-
-
-6. Start web server:
-
-    ```
-    tests/bin/yii serve
-    ```
-
-7. Now you can run all available tests
-
-   ```
-   # run all available tests
-   vendor/bin/codecept run
-
-   # run acceptance tests
-   vendor/bin/codecept run acceptance
-
-   # run only unit and functional tests
-   vendor/bin/codecept run unit,functional
-   ```
-
-### Code coverage support
-
-By default, code coverage is disabled in `codeception.yml` configuration file, you should uncomment needed rows to be able
-to collect code coverage. You can run your tests and collect coverage with the following command:
-
-```
-#collect coverage for all tests
-vendor/bin/codecept run --coverage --coverage-html --coverage-xml
-
-#collect coverage only for unit tests
-vendor/bin/codecept run unit --coverage --coverage-html --coverage-xml
-
-#collect coverage for unit and functional tests
-vendor/bin/codecept run functional,unit --coverage --coverage-html --coverage-xml
+```php
+'baseUrl' => '/devstart',
 ```
 
-You can see code coverage output under the `tests/_output` directory.
+Если проект размещён по другому адресу, измените `baseUrl` и адрес `returnUrl` Google OAuth в соответствии с локальной конфигурацией.
+
+### 6. Запуск
+
+Запустите Apache и MySQL в панели управления XAMPP.
+
+Откройте в браузере:
+
+```text
+http://localhost/devstart/web/
+```
+
+В конфигурации проекта корневым маршрутом назначен `site/main`, поэтому при успешном запуске должна открыться главная страница DevStart.
+
+## Примечания
+
+- Не добавляйте `.env` с реальными ключами API и OAuth в Git.
+- Для полноценной работы приложения необходима корректно подготовленная база данных с таблицами и начальными данными.
+- При публикации проекта на сервере отключите режим отладки Yii2 и настройте безопасные значения конфигурации.
